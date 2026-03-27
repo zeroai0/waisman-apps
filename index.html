@@ -499,6 +499,20 @@
 </div>
 
 <script>
+  // === PASSWORD GATE ===
+  (function() {
+    const key = 'ms_auth';
+    const pass = 'waisman2026';
+    if (sessionStorage.getItem(key) !== 'ok') {
+      const input = prompt('Enter access code:');
+      if (input !== pass) {
+        document.body.innerHTML = '<div style="background:#020810;color:#4a7a99;height:100vh;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:14px;">Access Denied</div>';
+        return;
+      }
+      sessionStorage.setItem(key, 'ok');
+    }
+  })();
+
   // === NEURAL CANVAS ===
   const canvas = document.getElementById('node-canvas');
   const ctx = canvas.getContext('2d');
