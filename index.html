@@ -5,40 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Mothership</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
+      --bg: #0a0a0a;
+      --bg2: #111111;
+      --bg3: #1a1a1a;
+      --bg4: #222222;
+      --border: rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.12);
+      --text: #e8e8e8;
+      --text2: #888888;
+      --text3: #444444;
       --green: #319B42;
       --blue: #00558C;
-      --cyan: #00d4ff;
-      --purple: #8b5cf6;
-      --orange: #f59e0b;
-      --red: #ef4444;
-      --bg: #020810;
-      --bg2: #060f1e;
-      --bg3: #0a1828;
-      --border: rgba(0,212,255,0.15);
-      --text: #e0f4ff;
-      --text2: #4a7a99;
+      --accent: #c8c8c8;
     }
 
     body {
+      font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* CANVAS — full page node graph */
-    #node-canvas {
+    /* CANVAS */
+    #bg-canvas {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
       pointer-events: none;
       z-index: 0;
+      opacity: 0.15;
     }
 
     .page { position: relative; z-index: 1; }
@@ -46,508 +47,446 @@
     /* HEADER */
     header {
       text-align: center;
-      padding: 40px 24px 24px;
+      padding: 80px 24px 60px;
     }
-    .header-line {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--cyan);
-      margin-bottom: 12px;
-      opacity: 0.8;
-    }
-    h1 {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: clamp(40px, 9vw, 88px);
-      font-weight: 700;
-      letter-spacing: 8px;
-      color: #fff;
-      text-shadow: 0 0 40px rgba(0,212,255,0.5), 0 0 80px rgba(0,212,255,0.2);
-      line-height: 1;
-    }
-    .tagline {
-      font-size: 12px;
-      color: var(--text2);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin-top: 8px;
-    }
-    .tagline em { color: var(--green); font-style: normal; }
-
-    /* FLEET STATUS BAR */
-    .fleet-bar {
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 32px;
-      flex-wrap: wrap;
-    }
-    .fleet-stat {
-      display: flex;
+    .header-pill {
+      display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-size: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
       color: var(--text2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 16px;
+      margin-bottom: 32px;
     }
-    .fleet-stat .val {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--cyan);
-    }
-    .fleet-dot {
-      width: 8px; height: 8px;
+    .pill-dot {
+      width: 6px; height: 6px;
       border-radius: 50%;
       background: var(--green);
-      box-shadow: 0 0 8px var(--green);
-      animation: pulse-dot 1.5s ease-in-out infinite;
+      animation: pulse 2s ease-in-out infinite;
     }
-    @keyframes pulse-dot {
-      0%,100% { opacity: 1; }
-      50% { opacity: 0.3; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(52px, 10vw, 110px);
+      font-weight: 700;
+      letter-spacing: -4px;
+      color: var(--text);
+      line-height: 0.95;
+      margin-bottom: 20px;
+    }
+    h1 .dim { color: var(--text3); }
+
+    .tagline {
+      font-size: 15px;
+      color: var(--text2);
+      letter-spacing: 0.5px;
     }
 
-    /* MAIN CONTENT */
-    .content {
-      max-width: 1400px;
+    /* GRID */
+    .grid {
+      max-width: 1300px;
       margin: 0 auto;
-      padding: 16px 20px 80px;
+      padding: 0 24px 100px;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
-    @media (max-width: 900px) { .content { grid-template-columns: 1fr; } }
+    @media(max-width:900px){ .grid{ grid-template-columns:1fr; } }
+    @media(max-width:1200px) and (min-width:900px){ .grid{ grid-template-columns:1fr 1fr; } }
 
-    /* SECTION */
-    .section {
-      background: rgba(6,15,30,0.85);
+    /* PANEL */
+    .panel {
+      background: var(--bg2);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 20px;
-      backdrop-filter: blur(10px);
-      position: relative;
-      overflow: hidden;
+      padding: 24px;
+      transition: border-color 0.3s;
     }
-    .section::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-      opacity: 0.5;
-    }
-    .section.full { grid-column: span 2; }
-    @media (max-width: 900px) { .section.full { grid-column: span 1; } }
+    .panel:hover { border-color: var(--border-hover); }
+    .panel.full { grid-column: span 3; }
+    .panel.wide { grid-column: span 2; }
+    @media(max-width:1200px){ .panel.full,.panel.wide{ grid-column:span 1; } }
 
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .section-title {
+    .panel-label {
       font-size: 10px;
       font-weight: 700;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: var(--cyan);
+      color: var(--text3);
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .section-count {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 13px;
-      color: var(--text2);
+    .panel-label::before {
+      content:'';
+      width:16px; height:1px;
+      background: var(--border-hover);
     }
 
-    /* PROJECT NODES */
-    .project-list { display: flex; flex-direction: column; gap: 8px; }
-    .project-node {
+    /* AGENTS */
+    .agent-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    @media(max-width:600px){ .agent-grid{ grid-template-columns:1fr 1fr; } }
+
+    .agent-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 14px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .agent-card:hover { border-color: var(--border-hover); transform: translateY(-1px); }
+    .agent-card.is-active { border-color: rgba(49,155,66,0.25); background: rgba(49,155,66,0.04); }
+
+    .agent-icon { font-size: 26px; display: block; margin-bottom: 8px; }
+    .agent-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.5px;
+    }
+    .agent-role { font-size: 10px; color: var(--text3); margin: 3px 0 8px; }
+    .agent-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 10px;
+    }
+    .s-active { background: rgba(49,155,66,0.12); color: var(--green); }
+    .s-idle { background: rgba(255,255,255,0.05); color: var(--text3); }
+    .s-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+    .s-active .s-dot { animation: pulse 1s ease-in-out infinite; }
+    .agent-last { font-size: 9px; color: var(--text3); margin-top: 5px; }
+
+    /* POWER HOUR */
+    .ph-wrap { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; }
+    .ph-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .ph-time {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 54px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+    .ph-time.live { color: var(--green); }
+    .ph-sub { font-size: 12px; color: var(--text3); margin-top: 6px; }
+    .ph-bar { width: 100%; height: 2px; background: var(--border); border-radius: 2px; margin-top: 14px; }
+    .ph-fill { height: 100%; border-radius: 2px; background: var(--green); transition: width 1s linear; }
+
+    .scoring { display: flex; flex-direction: column; gap: 6px; }
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .sc-key { font-family: monospace; font-size: 13px; font-weight: 700; color: var(--accent); }
+    .sc-label { font-size: 12px; color: var(--text2); flex: 1; }
+    .sc-pts {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* PROJECTS */
+    .project-list { display: flex; flex-direction: column; gap: 6px; }
+    .proj {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 14px;
-      background: rgba(0,212,255,0.03);
-      border: 1px solid rgba(0,212,255,0.08);
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-      overflow: hidden;
+      padding: 10px 12px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: all 0.15s;
     }
-    .project-node:hover {
-      background: rgba(0,212,255,0.07);
-      border-color: rgba(0,212,255,0.25);
-      transform: translateX(3px);
-    }
-    .project-node::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 2px;
-    }
-    .project-node.live::before { background: var(--green); box-shadow: 0 0 8px var(--green); }
-    .project-node.active::before { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
-    .project-node.planned::before { background: var(--blue); }
-    .project-node.future::before { background: #334; }
-
-    .node-icon { font-size: 20px; flex-shrink: 0; }
-    .node-info { flex: 1; min-width: 0; }
-    .node-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .node-meta {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 3px;
-    }
-    .node-agent {
-      font-size: 10px;
-      color: var(--cyan);
-      opacity: 0.6;
-      font-family: monospace;
-    }
-    .node-badge {
+    .proj:hover { border-color: var(--border-hover); }
+    .proj-icon { font-size: 16px; flex-shrink: 0; }
+    .proj-name { font-size: 12px; font-weight: 600; color: var(--text); flex: 1; }
+    .proj-badge {
       font-size: 9px;
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
       padding: 2px 7px;
-      border-radius: 10px;
-    }
-    .badge-live { background: rgba(49,155,66,0.2); color: var(--green); border: 1px solid rgba(49,155,66,0.3); }
-    .badge-active { background: rgba(0,212,255,0.1); color: var(--cyan); border: 1px solid rgba(0,212,255,0.2); }
-    .badge-planned { background: rgba(0,85,140,0.2); color: #4a9fd5; border: 1px solid rgba(0,85,140,0.2); }
-    .badge-future { background: rgba(255,255,255,0.04); color: #334455; border: 1px solid #1a2535; }
-
-    /* AGENT NODES */
-    .agent-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .agent-node {
-      background: rgba(0,212,255,0.03);
-      border: 1px solid rgba(0,212,255,0.1);
-      border-radius: 12px;
-      padding: 14px;
-      text-align: center;
-      transition: all 0.3s;
-      position: relative;
-    }
-    .agent-node.is-active {
-      border-color: rgba(49,155,66,0.4);
-      background: rgba(49,155,66,0.05);
-      box-shadow: 0 0 20px rgba(49,155,66,0.1);
-    }
-    .agent-orb {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      margin: 0 auto 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      background: rgba(0,85,140,0.3);
-      border: 2px solid rgba(0,212,255,0.2);
-      position: relative;
-    }
-    .agent-node.is-active .agent-orb {
-      border-color: rgba(49,155,66,0.6);
-      background: rgba(49,155,66,0.1);
-      box-shadow: 0 0 20px rgba(49,155,66,0.3);
-      animation: orb-pulse 2s ease-in-out infinite;
-    }
-    @keyframes orb-pulse {
-      0%,100% { box-shadow: 0 0 20px rgba(49,155,66,0.3); }
-      50% { box-shadow: 0 0 35px rgba(49,155,66,0.6); }
-    }
-    .agent-name-label {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: var(--text);
-    }
-    .agent-role-label { font-size: 10px; color: var(--text2); margin: 2px 0 6px; }
-    .agent-status-badge {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .status-active { background: rgba(49,155,66,0.15); color: var(--green); }
-    .status-idle { background: rgba(0,85,140,0.15); color: #4a9fd5; }
-    .status-dot-sm { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
-    .status-active .status-dot-sm { animation: pulse-dot 1s ease-in-out infinite; }
-    .agent-last { font-size: 9px; color: #223344; margin-top: 4px; }
-
-    /* POWER HOUR */
-    .power-hour-panel {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 20px;
-      align-items: center;
-    }
-    .ph-time {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 52px;
-      font-weight: 700;
-      color: var(--cyan);
-      text-shadow: 0 0 30px rgba(0,212,255,0.5);
-      letter-spacing: 3px;
-      line-height: 1;
-    }
-    .ph-time.live { color: var(--green); text-shadow: 0 0 30px rgba(49,155,66,0.6); }
-    .ph-label { font-size: 10px; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
-    .ph-sublabel { font-size: 11px; color: var(--text2); margin-top: 4px; }
-    .ph-bar { width: 100%; height: 3px; background: rgba(255,255,255,0.05); border-radius: 3px; margin-top: 10px; }
-    .ph-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--cyan), var(--green)); transition: width 1s linear; }
-    .scoring-mini { display: flex; flex-direction: column; gap: 4px; }
-    .score-mini-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 10px;
-      background: rgba(0,212,255,0.04);
-      border: 1px solid rgba(0,212,255,0.08);
       border-radius: 8px;
     }
-    .sml { font-family: monospace; font-size: 12px; font-weight: 700; color: var(--cyan); }
-    .sml-label { font-size: 11px; color: var(--text2); flex: 1; }
-    .sml-pts { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; color: var(--green); }
+    .b-live { background: rgba(49,155,66,0.12); color: var(--green); }
+    .b-planned { background: rgba(255,255,255,0.05); color: var(--text3); }
+    .b-future { background: transparent; color: var(--text3); border: 1px solid var(--border); }
 
-    /* ACTIVITY */
-    .activity-list { display: flex; flex-direction: column; gap: 6px; }
-    .activity-row {
+    /* QUICK LINKS */
+    .links-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+    @media(max-width:600px){ .links-grid{ grid-template-columns:1fr 1fr; } }
+
+    .link-card {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 8px 10px;
-      background: rgba(0,212,255,0.02);
-      border: 1px solid rgba(0,212,255,0.06);
+      padding: 12px 14px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .link-card:hover { border-color: var(--border-hover); transform: translateY(-1px); }
+    .link-icon { font-size: 18px; flex-shrink: 0; }
+    .link-info { min-width: 0; }
+    .link-name { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .link-url { font-size: 10px; color: var(--text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+    @media(max-width:600px){ .stats-grid{ grid-template-columns:1fr 1fr; } }
+    .stat-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+    }
+    .stat-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+    .stat-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+
+    /* ACTIVITY */
+    .act-list { display: flex; flex-direction: column; gap: 6px; }
+    .act-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
       border-radius: 8px;
       font-size: 12px;
     }
-    .activity-row .ai { font-size: 14px; }
-    .activity-row .at { flex: 1; color: var(--text); }
-    .activity-row .ag { font-size: 10px; color: var(--text2); white-space: nowrap; }
+    .act-icon { font-size: 14px; }
+    .act-text { flex: 1; color: var(--text); }
+    .act-time { font-size: 10px; color: var(--text3); white-space: nowrap; }
 
     footer {
       text-align: center;
-      padding: 20px;
+      padding: 24px;
       font-size: 10px;
-      color: #1a2535;
+      color: var(--text3);
       letter-spacing: 2px;
-      text-transform: uppercase;
     }
   </style>
 </head>
 <body>
 
-<canvas id="node-canvas"></canvas>
+<canvas id="bg-canvas"></canvas>
 
 <div class="page">
 
   <header>
-    <div class="header-line">⚡ Waisman Organization · Command Center</div>
-    <h1>THE MOTHERSHIP</h1>
-    <p class="tagline">All Systems Operational · <em>Powered by Zero</em></p>
+    <div class="header-pill"><div class="pill-dot"></div>All Systems Operational</div>
+    <h1>THE<br><span class="dim">MOTHER</span>SHIP</h1>
+    <p class="tagline">Waisman Organization · Command Center · Powered by Zero</p>
   </header>
 
-  <!-- FLEET BAR -->
-  <div class="fleet-bar">
-    <div class="fleet-stat"><div class="fleet-dot"></div><span>Fleet Status</span><span class="val" id="fleet-status">Online</span></div>
-    <div class="fleet-stat"><span>Agents</span><span class="val">3</span></div>
-    <div class="fleet-stat"><span>Projects</span><span class="val">23</span></div>
-    <div class="fleet-stat"><span>Cron Jobs</span><span class="val">11</span></div>
-    <div class="fleet-stat"><span>Agencies</span><span class="val">3</span></div>
-  </div>
+  <div class="grid">
 
-  <div class="content">
+    <!-- STATS -->
+    <div class="panel full">
+      <div class="panel-label">Platform Overview</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num">9</div><div class="stat-label">Agents</div></div>
+        <div class="stat-card"><div class="stat-num">23</div><div class="stat-label">Projects</div></div>
+        <div class="stat-card"><div class="stat-num">12</div><div class="stat-label">Cron Jobs</div></div>
+        <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Agencies</div></div>
+      </div>
+    </div>
 
     <!-- AGENTS -->
-    <div class="section full">
-      <div class="section-header">
-        <div class="section-title">◈ Agent Fleet</div>
-        <div class="section-count">3 agents deployed</div>
-      </div>
-      <div class="agent-row">
-        <div class="agent-node is-active" id="agent-main">
-          <div class="agent-orb">⚡</div>
-          <div class="agent-name-label">ZERO</div>
-          <div class="agent-role-label">Main · Strategy & Build</div>
-          <span class="agent-status-badge status-active"><span class="status-dot-sm"></span>Active</span>
-          <div class="agent-last" id="last-main">Always on</div>
+    <div class="panel full">
+      <div class="panel-label">Agent Fleet</div>
+      <div class="agent-grid">
+        <div class="agent-card is-active" id="agent-main">
+          <span class="agent-icon">⚡</span>
+          <div class="agent-name">ZERO</div>
+          <div class="agent-role">Main · Strategy</div>
+          <span class="agent-status s-active"><span class="s-dot"></span>Active</span>
         </div>
-        <div class="agent-node" id="agent-powerhour">
-          <div class="agent-orb">🔥</div>
-          <div class="agent-name-label">POWERHOUR</div>
-          <div class="agent-role-label">Sales Bot · 8–10 PM EST</div>
-          <span class="agent-status-badge status-idle" id="status-powerhour"><span class="status-dot-sm"></span>Idle</span>
-          <div class="agent-last" id="last-powerhour">—</div>
+        <div class="agent-card" id="agent-discordbot">
+          <span class="agent-icon">🤖</span>
+          <div class="agent-name">DISCORDBOT</div>
+          <div class="agent-role">Power Hour · News</div>
+          <span class="agent-status s-idle" id="status-discordbot"><span class="s-dot"></span>Idle</span>
         </div>
-        <div class="agent-node" id="agent-newsbot">
-          <div class="agent-orb">📰</div>
-          <div class="agent-name-label">NEWSBOT</div>
-          <div class="agent-role-label">Daily Briefing · 7 AM EST</div>
-          <span class="agent-status-badge status-idle" id="status-newsbot"><span class="status-dot-sm"></span>Idle</span>
-          <div class="agent-last" id="last-newsbot">—</div>
+        <div class="agent-card" id="agent-salesbot">
+          <span class="agent-icon">🎯</span>
+          <div class="agent-name">SALESBOT</div>
+          <div class="agent-role">GHL · Leads · Dialer</div>
+          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
+        </div>
+        <div class="agent-card" id="agent-recruitbot">
+          <span class="agent-icon">🧲</span>
+          <div class="agent-name">RECRUITBOT</div>
+          <div class="agent-role">ATS · Pipeline</div>
+          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
+        </div>
+        <div class="agent-card" id="agent-contentbot">
+          <span class="agent-icon">📊</span>
+          <div class="agent-name">CONTENTBOT</div>
+          <div class="agent-role">Social · Decks · Email</div>
+          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
+        </div>
+        <div class="agent-card" id="agent-researchbot">
+          <span class="agent-icon">🔍</span>
+          <div class="agent-name">RESEARCHBOT</div>
+          <div class="agent-role">Trends · Intel</div>
+          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
+        </div>
+        <div class="agent-card">
+          <span class="agent-icon">📜</span>
+          <div class="agent-name">LICENSINGBOT</div>
+          <div class="agent-role">Licensing · Exams</div>
+          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
+        </div>
+        <div class="agent-card">
+          <span class="agent-icon">🎓</span>
+          <div class="agent-name">TRAININGBOT</div>
+          <div class="agent-role">Scripts · Objections</div>
+          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
+        </div>
+        <div class="agent-card">
+          <span class="agent-icon">👑</span>
+          <div class="agent-name">LEADERSHIPBOT</div>
+          <div class="agent-role">Coaching · Managers</div>
+          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
         </div>
       </div>
     </div>
 
-    <!-- WAISMAN ORG PROJECTS -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">◈ Waisman Org Builds</div>
-        <div class="section-count">15 projects</div>
+    <!-- POWER HOUR -->
+    <div class="panel">
+      <div class="panel-label">Power Hour</div>
+      <div class="ph-wrap">
+        <div>
+          <div class="ph-label" id="ph-label">Next Power Hour</div>
+          <div class="ph-time" id="ph-time">--:--:--</div>
+          <div class="ph-sub" id="ph-sub">EST · Mon–Fri</div>
+          <div class="ph-bar"><div class="ph-fill" id="ph-fill" style="width:0%"></div></div>
+        </div>
+        <div class="scoring">
+          <div class="score-row"><span class="sc-key">C</span><span class="sc-label">Calls</span><span class="sc-pts">1pt</span></div>
+          <div class="score-row"><span class="sc-key">P</span><span class="sc-label">Presentations</span><span class="sc-pts">30pts</span></div>
+          <div class="score-row"><span class="sc-key">S</span><span class="sc-label">Sales</span><span class="sc-pts">60pts</span></div>
+          <div class="score-row" style="border-color:rgba(49,155,66,0.15)"><span class="sc-key" style="color:var(--green)">🥇</span><span class="sc-label">Winner</span><span class="sc-pts" style="color:var(--green)">40 Leads</span></div>
+        </div>
       </div>
+    </div>
+
+    <!-- WAISMAN PROJECTS -->
+    <div class="panel">
+      <div class="panel-label">Waisman Org Builds</div>
       <div class="project-list">
-        <div class="project-node live"><span class="node-icon">✅</span><div class="node-info"><div class="node-name">Power Hour Bot</div><div class="node-meta"><span class="node-agent">⚡ zero · 🔥 powerhour</span><span class="node-badge badge-live">Live</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">📋</span><div class="node-info"><div class="node-name">Lead Tracking System</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">🏆</span><div class="node-info"><div class="node-name">March Madness Brackets</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">🎨</span><div class="node-info"><div class="node-name">Sales Post Generator</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">📱</span><div class="node-info"><div class="node-name">Social Media Ad Generation</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">🔗</span><div class="node-info"><div class="node-name">GoHighLevel Integration</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">🧲</span><div class="node-info"><div class="node-name">Recruiting Automation</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">💰</span><div class="node-info"><div class="node-name">MGA/RGA Bonus Tracker</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">📞</span><div class="node-info"><div class="node-name">Lead Nurturing + Auto Dialer</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">📚</span><div class="node-info"><div class="node-name">Sales Training Hub</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">📅</span><div class="node-info"><div class="node-name">Content Calendar</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">📊</span><div class="node-info"><div class="node-name">Monday Meeting Deck</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">🎬</span><div class="node-info"><div class="node-name">AI Promo Videos</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">📧</span><div class="node-info"><div class="node-name">Email Optimization</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node future"><span class="node-icon">📡</span><div class="node-info"><div class="node-name">Twilio Integration</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-future">Future</span></div></div></div>
+        <div class="proj"><span class="proj-icon">✅</span><span class="proj-name">Power Hour Bot</span><span class="proj-badge b-live">Live</span></div>
+        <div class="proj"><span class="proj-icon">📞</span><span class="proj-name">Predictive Dialer</span><span class="proj-badge b-live">Live</span></div>
+        <div class="proj"><span class="proj-icon">📋</span><span class="proj-name">Policy Form</span><span class="proj-badge b-live">Live</span></div>
+        <div class="proj"><span class="proj-icon">📄</span><span class="proj-name">Client Comms System</span><span class="proj-badge b-live">Live</span></div>
+        <div class="proj"><span class="proj-icon">📋</span><span class="proj-name">Lead Tracking System</span><span class="proj-badge b-planned">Planned</span></div>
+        <div class="proj"><span class="proj-icon">🏆</span><span class="proj-name">March Madness Brackets</span><span class="proj-badge b-planned">Planned</span></div>
+        <div class="proj"><span class="proj-icon">🎨</span><span class="proj-name">Sales Post Generator</span><span class="proj-badge b-planned">Planned</span></div>
+        <div class="proj"><span class="proj-icon">🔗</span><span class="proj-name">GoHighLevel Integration</span><span class="proj-badge b-planned">Planned</span></div>
+        <div class="proj"><span class="proj-icon">💰</span><span class="proj-name">MGA/RGA Bonus Tracker</span><span class="proj-badge b-planned">Planned</span></div>
+        <div class="proj"><span class="proj-icon">📡</span><span class="proj-name">Twilio Integration</span><span class="proj-badge b-future">Future</span></div>
       </div>
     </div>
 
     <!-- HQ PROJECTS -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">◈ HQ Platform Builds</div>
-        <div class="section-count">8 projects</div>
-      </div>
+    <div class="panel">
+      <div class="panel-label">HQ Platform Builds</div>
       <div class="project-list">
-        <div class="project-node active"><span class="node-icon">🎯</span><div class="node-info"><div class="node-name">ATS Recruiting System</div><div class="node-meta"><span class="node-agent">⚡ zero · Supabase</span><span class="node-badge badge-active">In Progress</span></div></div></div>
-        <div class="project-node active"><span class="node-icon">📊</span><div class="node-info"><div class="node-name">Pipeline Bot & Dashboard</div><div class="node-meta"><span class="node-agent">⚡ zero · GHL</span><span class="node-badge badge-active">In Progress</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">🎓</span><div class="node-info"><div class="node-name">Training Modules</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">🖥️</span><div class="node-info"><div class="node-name">Presentation</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">💹</span><div class="node-info"><div class="node-name">Sales & Data</div><div class="node-meta"><span class="node-agent">⚡ zero · Supabase</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">👑</span><div class="node-info"><div class="node-name">Leadership Development</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">🔁</span><div class="node-info"><div class="node-name">Conservation Bots</div><div class="node-meta"><span class="node-agent">⚡ zero · GHL</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-        <div class="project-node planned"><span class="node-icon">🔍</span><div class="node-info"><div class="node-name">Conservation & Quality</div><div class="node-meta"><span class="node-agent">⚡ zero</span><span class="node-badge badge-planned">Planned</span></div></div></div>
-      </div>
-    </div>
-
-    <!-- POWER HOUR + SCORING -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">◈ Power Hour</div>
-      </div>
-      <div class="power-hour-panel">
-        <div>
-          <div class="ph-label" id="ph-label">Next Power Hour</div>
-          <div class="ph-time" id="ph-countdown">--:--:--</div>
-          <div class="ph-sublabel" id="ph-sub">EST · Mon–Fri</div>
-          <div class="ph-bar"><div class="ph-bar-fill" id="ph-bar" style="width:0%"></div></div>
-        </div>
-        <div class="scoring-mini">
-          <div class="score-mini-row"><span class="sml">C</span><span class="sml-label">Calls</span><span class="sml-pts">1pt</span></div>
-          <div class="score-mini-row"><span class="sml">P</span><span class="sml-label">Presentations</span><span class="sml-pts">30pts</span></div>
-          <div class="score-mini-row"><span class="sml">S</span><span class="sml-label">Sales</span><span class="sml-pts">60pts</span></div>
-          <div class="score-mini-row" style="border-color:rgba(49,155,66,0.2)"><span class="sml" style="color:var(--green)">🥇</span><span class="sml-label">Winner</span><span class="sml-pts">40 Leads</span></div>
-          <div class="score-mini-row" style="border-color:rgba(49,155,66,0.2)"><span class="sml" style="color:var(--green)">🎟</span><span class="sml-label">Raffle</span><span class="sml-pts">40 Leads</span></div>
-        </div>
+        <div class="proj"><span class="proj-icon">🎯</span><span class="proj-name">ATS Recruiting System</span><span class="proj-badge b-planned">In Progress</span></div>
+        <div class="proj"><span class="proj-icon">📊</span><span class="proj-name">Pipeline Bot & Dashboard</span><span class="proj-badge b-planned">In Progress</span></div>
+        <div class="proj"><span class="proj-icon">💹</span><span class="proj-name">Sales & Data</span><span class="proj-badge b-planned">Planned</span></div>
+        <div class="proj"><span class="proj-icon">👑</span><span class="proj-name">Leadership Development</span><span class="proj-badge b-planned">Planned</span></div>
+        <div class="proj"><span class="proj-icon">🔁</span><span class="proj-name">Conservation Bots</span><span class="proj-badge b-planned">Planned</span></div>
+        <div class="proj"><span class="proj-icon">🔍</span><span class="proj-name">Conservation & Quality</span><span class="proj-badge b-planned">Planned</span></div>
+        <div class="proj"><span class="proj-icon">📱</span><span class="proj-name">Social Media Ads</span><span class="proj-badge b-planned">Planned</span></div>
+        <div class="proj"><span class="proj-icon">📅</span><span class="proj-name">Content Calendar</span><span class="proj-badge b-planned">Planned</span></div>
+        <div class="proj"><span class="proj-icon">📊</span><span class="proj-name">Monday Meeting Deck</span><span class="proj-badge b-planned">Planned</span></div>
+        <div class="proj"><span class="proj-icon">🎬</span><span class="proj-name">AI Promo Videos</span><span class="proj-badge b-planned">Planned</span></div>
       </div>
     </div>
 
     <!-- QUICK LINKS -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">◈ Quick Links</div>
-        <div class="section-count">Live apps</div>
-      </div>
-      <div class="project-list">
-        <a href="https://waisman-mothership.vercel.app" target="_blank" class="project-node live" style="text-decoration:none">
-          <span class="node-icon">🚀</span>
-          <div class="node-info">
-            <div class="node-name">The Mothership</div>
-            <div class="node-meta"><span class="node-agent">waisman-mothership.vercel.app</span><span class="node-badge badge-live">Live</span></div>
-          </div>
+    <div class="panel full">
+      <div class="panel-label">Quick Links</div>
+      <div class="links-grid">
+        <a class="link-card" href="https://waisman-platform.vercel.app" target="_blank">
+          <span class="link-icon">🚀</span>
+          <div class="link-info"><div class="link-name">Waisman Platform</div><div class="link-url">waisman-platform.vercel.app</div></div>
         </a>
-        <a href="https://waisman-policy-form.vercel.app" target="_blank" class="project-node live" style="text-decoration:none">
-          <span class="node-icon">📋</span>
-          <div class="node-info">
-            <div class="node-name">Policy Form</div>
-            <div class="node-meta"><span class="node-agent">waisman-policy-form.vercel.app</span><span class="node-badge badge-live">Live</span></div>
-          </div>
+        <a class="link-card" href="https://waisman-dialer.vercel.app" target="_blank">
+          <span class="link-icon">📞</span>
+          <div class="link-info"><div class="link-name">Dialer</div><div class="link-url">waisman-dialer.vercel.app</div></div>
         </a>
-        <a href="https://brackets.waismanorganization.com" target="_blank" class="project-node planned" style="text-decoration:none">
-          <span class="node-icon">🏆</span>
-          <div class="node-info">
-            <div class="node-name">March Madness Brackets</div>
-            <div class="node-meta"><span class="node-agent">brackets.waismanorganization.com</span><span class="node-badge badge-planned">Planned</span></div>
-          </div>
+        <a class="link-card" href="https://waisman-policy-form.vercel.app" target="_blank">
+          <span class="link-icon">📋</span>
+          <div class="link-info"><div class="link-name">Policy Form</div><div class="link-url">waisman-policy-form.vercel.app</div></div>
         </a>
-        <a href="https://drive.google.com/drive/folders/1DIoif1il_duDfY2mqmcShRGJKUd9LIbA" target="_blank" class="project-node planned" style="text-decoration:none">
-          <span class="node-icon">📁</span>
-          <div class="node-info">
-            <div class="node-name">HQ Google Drive</div>
-            <div class="node-meta"><span class="node-agent">Google Drive · HQ</span><span class="node-badge badge-planned">Drive</span></div>
-          </div>
+        <a class="link-card" href="https://waisman-policy-form.vercel.app/system-overview.html" target="_blank">
+          <span class="link-icon">📄</span>
+          <div class="link-info"><div class="link-name">Client Comms Doc</div><div class="link-url">system-overview.html</div></div>
         </a>
-        <a href="https://drive.google.com/drive/folders/1QBjwtZPtDL2PWf3ej4vGkfsphA2hQU9O" target="_blank" class="project-node planned" style="text-decoration:none">
-          <span class="node-icon">📁</span>
-          <div class="node-info">
-            <div class="node-name">CSS Google Drive</div>
-            <div class="node-meta"><span class="node-agent">Google Drive · CSS</span><span class="node-badge badge-planned">Drive</span></div>
-          </div>
+        <a class="link-card" href="https://drive.google.com/drive/folders/1DIoif1il_duDfY2mqmcShRGJKUd9LIbA" target="_blank">
+          <span class="link-icon">📁</span>
+          <div class="link-info"><div class="link-name">HQ Google Drive</div><div class="link-url">Google Drive · HQ</div></div>
         </a>
-        <a href="https://vjcfbccsybkriefnyvhf.supabase.co" target="_blank" class="project-node active" style="text-decoration:none">
-          <span class="node-icon">🗄️</span>
-          <div class="node-info">
-            <div class="node-name">Supabase Database</div>
-            <div class="node-meta"><span class="node-agent">vjcfbccsybkriefnyvhf.supabase.co</span><span class="node-badge badge-active">Connected</span></div>
-          </div>
+        <a class="link-card" href="https://drive.google.com/drive/folders/1QBjwtZPtDL2PWf3ej4vGkfsphA2hQU9O" target="_blank">
+          <span class="link-icon">📁</span>
+          <div class="link-info"><div class="link-name">CSS Google Drive</div><div class="link-url">Google Drive · CSS</div></div>
         </a>
-        <a href="https://waisman-policy-form.vercel.app/system-overview.html" target="_blank" class="project-node live" style="text-decoration:none">
-          <span class="node-icon">📄</span>
-          <div class="node-info">
-            <div class="node-name">Client Comms System Doc</div>
-            <div class="node-meta"><span class="node-agent">waisman-policy-form.vercel.app</span><span class="node-badge badge-live">Live</span></div>
-          </div>
+        <a class="link-card" href="https://brackets.waismanorganization.com" target="_blank">
+          <span class="link-icon">🏆</span>
+          <div class="link-info"><div class="link-name">March Madness Brackets</div><div class="link-url">brackets.waismanorganization.com</div></div>
+        </a>
+        <a class="link-card" href="https://vjcfbccsybkriefnyvhf.supabase.co" target="_blank">
+          <span class="link-icon">🗄️</span>
+          <div class="link-info"><div class="link-name">Supabase Database</div><div class="link-url">supabase.co</div></div>
         </a>
       </div>
     </div>
 
-    <!-- LIVE ACTIVITY -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">◈ Live Activity</div>
-        <div class="section-count" id="last-refresh">—</div>
-      </div>
-      <div class="activity-list" id="activity-feed">
-        <div class="activity-row"><span class="ai">✅</span><span class="at">Power Hour Bot deployed — 11 cron jobs active</span><span class="ag">Mar 24</span></div>
-        <div class="activity-row"><span class="ai">🤖</span><span class="at">NewsBot created — 7 AM EST daily briefing</span><span class="ag">Mar 24</span></div>
-        <div class="activity-row"><span class="ai">🏢</span><span class="at">HQ Discord cleaned — permissions + Google Drives pinned</span><span class="ag">Mar 25</span></div>
-        <div class="activity-row"><span class="ai">📋</span><span class="at">Client Policy Form built — mobile-ready, Supabase-ready</span><span class="ag">Mar 25</span></div>
-        <div class="activity-row"><span class="ai">📄</span><span class="at">Texting Platform Roadmap — full workflow documented</span><span class="ag">Mar 25</span></div>
-        <div class="activity-row"><span class="ai">🔧</span><span class="at">Power Hour agent fixed — switched to main agent</span><span class="ag">Mar 26</span></div>
-        <div class="activity-row"><span class="ai">🚀</span><span class="at">The Mothership launched</span><span class="ag">Mar 26</span></div>
+    <!-- ACTIVITY -->
+    <div class="panel full">
+      <div class="panel-label">Recent Activity</div>
+      <div class="act-list" id="activity-feed">
+        <div class="act-row"><span class="act-icon">✅</span><span class="act-text">Waisman Platform launched — unified app hub live</span><span class="act-time">Mar 27</span></div>
+        <div class="act-row"><span class="act-icon">🤖</span><span class="act-text">9-agent fleet deployed — DiscordBot, SalesBot, RecruitBot, ContentBot, ResearchBot, LicensingBot, TrainingBot, LeadershipBot</span><span class="act-time">Mar 27</span></div>
+        <div class="act-row"><span class="act-icon">📞</span><span class="act-text">Predictive Dialer built and deployed — waisman-dialer.vercel.app</span><span class="act-time">Mar 27</span></div>
+        <div class="act-row"><span class="act-icon">🗄️</span><span class="act-text">Supabase connected — policy_applications, power_hour_scores, referrals tables live</span><span class="act-time">Mar 26</span></div>
+        <div class="act-row"><span class="act-icon">📋</span><span class="act-text">Client Policy Form deployed with Supabase integration</span><span class="act-time">Mar 25</span></div>
+        <div class="act-row"><span class="act-icon">🏢</span><span class="act-text">HQ Discord server cleaned — categories, channels, permissions, Google Drives pinned</span><span class="act-time">Mar 25</span></div>
+        <div class="act-row"><span class="act-icon">🔥</span><span class="act-text">Power Hour Bot fully configured — 11 cron jobs, weekly prizes, scoring system</span><span class="act-time">Mar 24</span></div>
       </div>
     </div>
 
@@ -558,42 +497,32 @@
 </div>
 
 <script>
-  // === PASSWORD GATE ===
+  // Password gate
   (function() {
-    const key = 'ms_auth';
     const pass = 'Waisman2026';
-    if (sessionStorage.getItem(key) !== 'ok') {
-      const input = prompt('Enter access code:');
+    if (sessionStorage.getItem('ms_auth') !== 'ok') {
+      const input = prompt('Access code:');
       if (input !== pass) {
-        document.body.innerHTML = '<div style="background:#020810;color:#4a7a99;height:100vh;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:14px;">Access Denied</div>';
+        document.body.innerHTML = '<div style="background:#0a0a0a;color:#333;height:100vh;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;letter-spacing:2px;">ACCESS DENIED</div>';
         return;
       }
-      sessionStorage.setItem(key, 'ok');
+      sessionStorage.setItem('ms_auth', 'ok');
     }
   })();
 
-  // === NEURAL CANVAS ===
-  const canvas = document.getElementById('node-canvas');
+  // Canvas — subtle dark particles
+  const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
   let particles = [], W, H;
 
-  function resize() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', () => { resize(); init(); });
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', () => { resize(); init(); });
 
   function init() {
     particles = [];
-    const n = Math.floor((W * H) / 10000);
+    const n = Math.floor((W * H) / 15000);
     for (let i = 0; i < n; i++) {
-      particles.push({
-        x: Math.random() * W, y: Math.random() * H,
-        vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3,
-        r: Math.random()*1.5+0.5,
-        hue: Math.random() > 0.5 ? 195 : 130
-      });
+      particles.push({ x: Math.random()*W, y: Math.random()*H, vx:(Math.random()-.5)*.2, vy:(Math.random()-.5)*.2, r: Math.random()+.3 });
     }
   }
   init();
@@ -603,28 +532,17 @@
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
       p.x += p.vx; p.y += p.vy;
-      if (p.x<0||p.x>W) p.vx*=-1;
-      if (p.y<0||p.y>H) p.vy*=-1;
-
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle = `hsla(${p.hue},80%,60%,0.5)`;
-      ctx.fill();
-
-      for (let j = i+1; j < particles.length; j++) {
-        const q = particles[j];
-        const dx=p.x-q.x, dy=p.y-q.y;
-        const d=Math.sqrt(dx*dx+dy*dy);
-        if (d<100) {
-          ctx.beginPath();
-          ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y);
-          // Fluorescent lines — alternating cyan and green
-          const alpha = 0.12*(1-d/100);
-          ctx.strokeStyle = p.hue === 195 
-            ? `rgba(0,212,255,${alpha})` 
-            : `rgba(49,155,66,${alpha})`;
-          ctx.lineWidth = 0.6;
-          ctx.stroke();
+      if(p.x<0||p.x>W) p.vx*=-1;
+      if(p.y<0||p.y>H) p.vy*=-1;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(200,200,200,0.4)'; ctx.fill();
+      for(let j=i+1;j<particles.length;j++){
+        const q=particles[j];
+        const dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy);
+        if(d<120){
+          ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y);
+          ctx.strokeStyle=`rgba(200,200,200,${0.08*(1-d/120)})`;
+          ctx.lineWidth=.4; ctx.stroke();
         }
       }
     }
@@ -632,116 +550,70 @@
   }
   draw();
 
-  // === POWER HOUR ===
+  // Power Hour countdown
   function updatePH() {
-    const now = new Date();
-    const est = new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+    const est = new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
     const day=est.getDay(), h=est.getHours(), m=est.getMinutes(), s=est.getSeconds();
-    const isWD=day>=1&&day<=5;
-    const total=h*3600+m*60+s;
-    const live=isWD&&h>=20&&h<21;
-    const cd=document.getElementById('ph-countdown');
-    const lbl=document.getElementById('ph-label');
-    const sub=document.getElementById('ph-sub');
-    const bar=document.getElementById('ph-bar');
-
-    if (live) {
+    const isWD=day>=1&&day<=5, total=h*3600+m*60+s, live=isWD&&h>=20&&h<21;
+    const tEl=document.getElementById('ph-time'), lEl=document.getElementById('ph-label'), sEl=document.getElementById('ph-sub'), fEl=document.getElementById('ph-fill');
+    if(live){
       const rem=21*3600-total;
-      const mm=String(Math.floor(rem/60)).padStart(2,'0');
-      const ss=String(rem%60).padStart(2,'0');
-      cd.textContent=`00:${mm}:${ss}`;
-      cd.className='ph-time live';
-      lbl.textContent='🔥 POWER HOUR LIVE';
-      sub.textContent='Report: C X P Y S Z';
-      bar.style.width=((total-20*3600)/3600*100)+'%';
+      const mm=String(Math.floor(rem/60)).padStart(2,'0'), ss=String(rem%60).padStart(2,'0');
+      tEl.textContent=`00:${mm}:${ss}`; tEl.className='ph-time live';
+      lEl.textContent='🔥 LIVE NOW'; sEl.textContent='Report: C X P Y S Z';
+      fEl.style.width=((total-72000)/3600*100)+'%';
     } else {
       let tgt=new Date(est); tgt.setHours(20,0,0,0);
-      if (total>=21*3600||!isWD) {
-        tgt.setDate(tgt.getDate()+1);
-        while(tgt.getDay()===0||tgt.getDay()===6) tgt.setDate(tgt.getDate()+1);
-      }
+      if(total>=76200||!isWD){tgt.setDate(tgt.getDate()+1); while(tgt.getDay()===0||tgt.getDay()===6) tgt.setDate(tgt.getDate()+1);}
       const diff=Math.floor((tgt-est)/1000);
-      const hh=String(Math.floor(diff/3600)).padStart(2,'0');
-      const mm=String(Math.floor((diff%3600)/60)).padStart(2,'0');
-      const ss=String(diff%60).padStart(2,'0');
-      cd.textContent=`${hh}:${mm}:${ss}`;
-      cd.className='ph-time';
-      lbl.textContent='Next Power Hour';
-      sub.textContent='EST · Mon–Fri';
-      bar.style.width='0%';
+      const hh=String(Math.floor(diff/3600)).padStart(2,'0'), mm=String(Math.floor((diff%3600)/60)).padStart(2,'0'), ss=String(diff%60).padStart(2,'0');
+      tEl.textContent=`${hh}:${mm}:${ss}`; tEl.className='ph-time';
+      lEl.textContent='Next Power Hour'; sEl.textContent='EST · Mon–Fri'; fEl.style.width='0%';
     }
   }
   updatePH(); setInterval(updatePH,1000);
 
-  // === LIVE AGENT STATUS ===
+  // Live agent status from local server
   const JOB_NAMES = {
     '899f1a5a-6408-4108-96e2-872703663485':'Power Hour Kickoff',
-    '6291ec7d-ccb2-42f3-8d48-99f4ac9a6655':'Leaderboard 8:15',
-    '825a0172-0b8e-40a5-941c-7647b41c6374':'Leaderboard 8:30',
-    '6b2737f7-8dc7-446d-84c4-7640c8bb1fbd':'Leaderboard 8:45',
-    'c4c30c23-8009-4599-b207-bd5d7d4c9f69':'Power Hour Wrap',
-    '74ad6d2f-2cef-473f-a3f5-e8ccc265841c':'Final Board 10PM',
-    '63ae0a3d-6ffa-48b5-a62d-e24977dfff51':'Weekly Winner',
-    '93bdaf2d-ab62-43f7-a474-99d5e20b5307':'Reminder 8:14',
-    '7727382c-ec47-4ad4-ac52-b38be8c816e6':'Reminder 8:29',
-    'b722a7b6-5433-4f32-969e-8917299344bc':'Reminder 8:44',
-    '02e6ada8-4023-4704-8774-41226e8a01d1':'Final Reminder',
     '62b495df-34ef-4e6f-9181-e16a63388897':'Morning Briefing',
-    '83956db9-3e99-4372-89c2-48d3cacb0fcf':'Morning Motivation',
+    '74ad6d2f-2cef-473f-a3f5-e8ccc265841c':'Final Board 10PM',
   };
 
-  function ago(secs) {
-    if(secs<60) return `${secs}s ago`;
-    if(secs<3600) return `${Math.floor(secs/60)}m ago`;
-    if(secs<86400) return `${Math.floor(secs/3600)}h ago`;
-    return `${Math.floor(secs/86400)}d ago`;
-  }
+  function ago(s) { if(s<60)return`${s}s`;if(s<3600)return`${Math.floor(s/60)}m`;return`${Math.floor(s/3600)}h`; }
 
   async function fetchAgents() {
     try {
-      const r = await fetch('http://127.0.0.1:7474/api/agents');
-      if(!r.ok) return;
+      const r = await fetch('http://127.0.0.1:7474/api/agents'); if(!r.ok) return;
       const agents = await r.json();
-      const map = {main:'main',powerhour:'powerhour',newsbot:'newsbot'};
-      for (const [id, data] of Object.entries(agents)) {
+      for(const [id, data] of Object.entries(agents)){
         const card = document.getElementById(`agent-${id}`);
         const statusEl = document.getElementById(`status-${id}`);
-        const lastEl = document.getElementById(`last-${id}`);
         if(!card) continue;
-        if(data.status==='active') {
-          card.classList.add('is-active');
-          if(statusEl) { statusEl.className='agent-status-badge status-active'; statusEl.innerHTML='<span class="status-dot-sm"></span>Active'; }
-        } else {
-          card.classList.remove('is-active');
-          if(statusEl) { statusEl.className='agent-status-badge status-idle'; statusEl.innerHTML='<span class="status-dot-sm"></span>Idle'; }
-        }
-        if(lastEl && data.lastJobName) lastEl.textContent=`${data.lastJobName} · ${ago(data.lastActiveAgo)}`;
+        if(data.status==='active'){ card.classList.add('is-active'); if(statusEl){statusEl.className='agent-status s-active'; statusEl.innerHTML='<span class="s-dot"></span>Active';} }
+        else { card.classList.remove('is-active'); if(statusEl){statusEl.className='agent-status s-idle'; statusEl.innerHTML='<span class="s-dot"></span>Idle';} }
       }
     } catch {}
   }
 
-  async function fetchRuns() {
+  async function fetchActivity() {
     try {
-      const r = await fetch('http://127.0.0.1:7474/api/runs');
-      if(!r.ok) return;
+      const r = await fetch('http://127.0.0.1:7474/api/runs'); if(!r.ok) return;
       const runs = await r.json();
-      const feed = document.getElementById('activity-feed');
-      const refresh = document.getElementById('last-refresh');
-      if(refresh) refresh.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
       if(!runs.length) return;
-      const items = runs.slice(0,7).map(r => {
-        const name = JOB_NAMES[r.jobId] || r.jobId?.slice(0,8)+'…';
-        const icon = r.status==='ok'?'✅':'❌';
-        const t = ago(Math.floor((Date.now()-r.ts)/1000));
-        return `<div class="activity-row"><span class="ai">${icon}</span><span class="at">🤖 <strong>${name}</strong> — ${r.status==='ok'?'completed':'failed'}</span><span class="ag">${t}</span></div>`;
+      const feed = document.getElementById('activity-feed');
+      const items = runs.slice(0,7).map(run => {
+        const name = JOB_NAMES[run.jobId] || 'Agent task';
+        const icon = run.status==='ok'?'✅':'❌';
+        const t = ago(Math.floor((Date.now()-run.ts)/1000));
+        return `<div class="act-row"><span class="act-icon">${icon}</span><span class="act-text">🤖 <strong>${name}</strong> — ${run.status==='ok'?'completed':'failed'}</span><span class="act-time">${t} ago</span></div>`;
       });
       feed.innerHTML = items.join('');
     } catch {}
   }
 
   fetchAgents(); setInterval(fetchAgents, 10000);
-  fetchRuns();   setInterval(fetchRuns, 15000);
+  fetchActivity(); setInterval(fetchActivity, 15000);
 </script>
-
 </body>
 </html>
