@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { font-family:'Inter',sans-serif; background:#020408; color:#fff; overflow-x:hidden; }
+
+/* Particle canvas */
+canvas { position:fixed; inset:0; pointer-events:none; z-index:0; }
+
+/* Sections full-height */
+section { min-height:100vh; position:relative; z-index:1; display:flex; flex-direction:column; justify-content:center; padding:60px 80px; }
+
+/* Hero */
+.hero { align-items:flex-start; }
+.hero-eyebrow { font-size:11px; font-weight:700; letter-spacing:5px; text-transform:uppercase; color:rgba(49,155,66,0.7); margin-bottom:24px; }
+.hero-h1 { font-size:96px; font-weight:900; line-height:0.95; letter-spacing:-4px; }
+.hero-h1 .line1 { display:block; color:#fff; }
+.hero-h1 .line2 { display:block; color:#319B42; }
+.hero-h1 .line3 { display:block; color:rgba(255,255,255,0.15); }
+.hero-sub { font-size:16px; color:rgba(255,255,255,0.35); margin-top:32px; font-weight:300; max-width:400px; line-height:1.6; }
+.hero-scroll { position:absolute; bottom:40px; left:80px; font-size:10px; color:rgba(255,255,255,0.2); letter-spacing:3px; display:flex; align-items:center; gap:8px; }
+.hero-scroll::before { content:''; display:block; width:40px; height:1px; background:rgba(255,255,255,0.15); }
+
+/* Numbers section */
+.nums-section { background:linear-gradient(180deg,#020408,#050d14,#020408); }
+.nums-label { font-size:10px; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:rgba(255,255,255,0.2); margin-bottom:60px; }
+.nums-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; }
+.num-col { padding:0 60px 0 0; border-right:1px solid rgba(255,255,255,0.06); }
+.num-col:last-child { border:none; padding-left:60px; padding-right:0; }
+.num-col:nth-child(2) { padding-left:60px; }
+.num-counter { font-size:88px; font-weight:900; letter-spacing:-4px; line-height:1; }
+.num-counter.green { color:#319B42; text-shadow:0 0 60px rgba(49,155,66,0.3); }
+.num-counter.white { color:#fff; }
+.num-counter.dim { color:rgba(255,255,255,0.2); }
+.num-desc { font-size:13px; color:rgba(255,255,255,0.4); margin-top:16px; font-weight:400; line-height:1.5; }
+
+/* Leaderboard section */
+.lb-section { }
+.lb-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:48px; }
+.lb-title { font-size:48px; font-weight:900; letter-spacing:-2px; }
+.lb-title em { color:#319B42; font-style:normal; }
+.lb-rows { display:flex; flex-direction:column; gap:0; }
+.lb-row {
+  display:flex; align-items:center;
+  padding:20px 0;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  transition:padding-left 0.3s;
+}
+.lb-row:hover { padding-left:8px; border-bottom-color:rgba(49,155,66,0.15); }
+.lb-num { font-size:13px; color:rgba(255,255,255,0.15); font-weight:700; width:40px; }
+.lb-bar { flex:1; height:1px; background:rgba(255,255,255,0.05); margin:0 24px; position:relative; }
+.lb-bar-fill { position:absolute; top:-1px; left:0; height:3px; border-radius:3px; }
+.lb-name { font-size:18px; font-weight:700; color:#fff; min-width:220px; }
+.lb-org { font-size:11px; color:rgba(255,255,255,0.25); margin-top:2px; }
+.lb-amt { font-size:24px; font-weight:800; color:#319B42; font-variant-numeric:tabular-nums; }
+
+/* Links section */
+.links-section { background:linear-gradient(180deg,#020408,#030b10,#020408); }
+.links-title { font-size:48px; font-weight:900; letter-spacing:-2px; margin-bottom:48px; color:rgba(255,255,255,0.6); }
+.links-title em { color:#fff; font-style:normal; }
+.links-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.04); }
+.link-item {
+  padding:32px 36px; background:#020408; cursor:pointer;
+  transition:background 0.2s;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.link-item:hover { background:#050f16; }
+.li-name { font-size:18px; font-weight:700; }
+.li-url { font-size:11px; color:rgba(255,255,255,0.25); margin-top:4px; }
+.li-arrow { font-size:20px; color:rgba(255,255,255,0.1); transition:color 0.2s; }
+.link-item:hover .li-arrow { color:#319B42; }
+.li-live { font-size:8px; font-weight:800; letter-spacing:2px; text-transform:uppercase; padding:3px 8px; border-radius:4px; background:rgba(49,155,66,0.1); color:#319B42; border:1px solid rgba(49,155,66,0.2); margin-top:6px; display:inline-block; }
+.li-dim { opacity:0.35; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Waisman Organization · Powered by Zero ⚡</div>
+  <h1 class="hero-h1">
+    <span class="line1">WAISMAN</span>
+    <span class="line2">MOTHER</span>
+    <span class="line3">SHIP</span>
+  </h1>
+  <p class="hero-sub">Command center for 3 agencies, 134 agents, and everything we're building together.</p>
+  <div class="hero-scroll">SCROLL TO EXPLORE</div>
+</section>
+
+<!-- NUMBERS -->
+<section class="nums-section">
+  <div class="nums-label">March 2026 · Live Data</div>
+  <div class="nums-grid">
+    <div class="num-col">
+      <div class="num-counter green">$173K</div>
+      <div class="num-desc">Total MTD Net ALP<br>across WO, WG, and WP</div>
+    </div>
+    <div class="num-col">
+      <div class="num-counter white">134</div>
+      <div class="num-desc">Active agents<br>40 · 53 · 41 by org</div>
+    </div>
+    <div class="num-col">
+      <div class="num-counter dim">6</div>
+      <div class="num-desc">Live builds deployed<br>+2 shipped today</div>
+    </div>
+  </div>
+</section>
+
+<!-- LEADERBOARD -->
+<section class="lb-section">
+  <div class="lb-header">
+    <div class="lb-title">Mad <em>Money</em></div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:2px;text-transform:uppercase">Top 7 · March 2026</div>
+  </div>
+  <div class="lb-rows">
+    <div class="lb-row">
+      <div class="lb-num">01</div>
+      <div><div class="lb-name">Alexis Nichols</div><div class="lb-org">WG · SA</div></div>
+      <div class="lb-bar"><div class="lb-bar-fill" style="width:100%;background:#319B42;box-shadow:0 0 8px #319B42"></div></div>
+      <div class="lb-amt">$20,762</div>
+    </div>
+    <div class="lb-row">
+      <div class="lb-num">02</div>
+      <div><div class="lb-name">Damian Davis</div><div class="lb-org">WG · MGA</div></div>
+      <div class="lb-bar"><div class="lb-bar-fill" style="width:39%;background:#319B42"></div></div>
+      <div class="lb-amt">$8,136</div>
+    </div>
+    <div class="lb-row">
+      <div class="lb-num">03</div>
+      <div><div class="lb-name">Morgan Clegg</div><div class="lb-org">WG · MGA</div></div>
+      <div class="lb-bar"><div class="lb-bar-fill" style="width:37%;background:#319B42"></div></div>
+      <div class="lb-amt">$7,741</div>
+    </div>
+    <div class="lb-row">
+      <div class="lb-num">04</div>
+      <div><div class="lb-name">Lisa Richardson</div><div class="lb-org">WO</div></div>
+      <div class="lb-bar"><div class="lb-bar-fill" style="width:35%;background:rgba(49,155,66,0.5)"></div></div>
+      <div class="lb-amt" style="color:rgba(49,155,66,0.6)">$7,316</div>
+    </div>
+    <div class="lb-row">
+      <div class="lb-num">05</div>
+      <div><div class="lb-name">Kelly Yingling</div><div class="lb-org">WG</div></div>
+      <div class="lb-bar"><div class="lb-bar-fill" style="width:31%;background:rgba(49,155,66,0.4)"></div></div>
+      <div class="lb-amt" style="color:rgba(49,155,66,0.5)">$6,470</div>
+    </div>
+  </div>
+</section>
+
+<!-- LINKS -->
+<section class="links-section">
+  <div class="links-title">Quick <em>Links</em></div>
+  <div class="links-grid">
+    <div class="link-item">
+      <div><div class="li-name">March Madness</div><div class="li-url">brackets.waismanorganization.com</div><div class="li-live">LIVE</div></div>
+      <div class="li-arrow">→</div>
+    </div>
+    <div class="link-item">
+      <div><div class="li-name">Lead Tracker</div><div class="li-url">waisman-leads.vercel.app</div><div class="li-live">LIVE</div></div>
+      <div class="li-arrow">→</div>
+    </div>
+    <div class="link-item li-dim">
+      <div><div class="li-name">Waisman Platform</div><div class="li-url">waisman-platform.vercel.app</div></div>
+      <div class="li-arrow">→</div>
+    </div>
+    <div class="link-item li-dim">
+      <div><div class="li-name">Policy Form</div><div class="li-url">waisman-policy-form.vercel.app</div></div>
+      <div class="li-arrow">→</div>
+    </div>
+  </div>
+</section>
+
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+let W=c.width=window.innerWidth,H=c.height=window.innerHeight;
+const pts=Array.from({length:60},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,r:Math.random()*1.2+.3,a:Math.random()*.3+.05}));
+window.addEventListener('resize',()=>{W=c.width=window.innerWidth;H=c.height=window.innerHeight});
+(function draw(){requestAnimationFrame(draw);ctx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(49,155,66,${p.a})`;ctx.fill()})})();
+</script>
+</body>
+</html>

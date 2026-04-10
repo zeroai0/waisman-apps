@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: #050505;
+  color: #fff;
+  min-height: 100vh;
+  padding: 28px;
+}
+
+.nav {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom: 28px;
+  border-bottom: 1px solid #1a1a1a;
+  padding-bottom: 20px;
+}
+.nav-left { display:flex; align-items:center; gap:16px; }
+.nav-pip {
+  width:10px; height:10px; border-radius:50%;
+  background:#319B42; box-shadow:0 0 14px #319B42;
+}
+.nav-name { font-size:12px; font-weight:800; letter-spacing:4px; text-transform:uppercase; color:rgba(255,255,255,0.5); }
+.nav-right { font-size:11px; color:rgba(255,255,255,0.2); letter-spacing:1px; }
+
+/* Bento grid */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto;
+  gap: 10px;
+}
+
+/* Block base */
+.block {
+  border: 1px solid #1c1c1c;
+  border-radius: 14px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  background: #0a0a0a;
+}
+.block:hover { border-color: #2a2a2a; }
+
+/* Accent top line */
+.block.accent-green::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, #319B42, transparent);
+}
+.block.accent-blue::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, #00558C, transparent);
+}
+
+/* Spans */
+.col-4  { grid-column: span 4; }
+.col-5  { grid-column: span 5; }
+.col-6  { grid-column: span 6; }
+.col-7  { grid-column: span 7; }
+.col-8  { grid-column: span 8; }
+.col-12 { grid-column: span 12; }
+
+/* Hero number block */
+.num-huge {
+  font-size: 72px; font-weight: 900; color: #fff;
+  letter-spacing: -3px; line-height: 1;
+}
+.num-huge.green { color: #319B42; }
+.num-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; color: rgba(255,255,255,0.25);
+  margin-bottom: 10px;
+}
+.num-sub { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 10px; }
+
+/* Horizontal rule dividers */
+.hr { height:1px; background:#1a1a1a; margin:12px 0; }
+
+/* Agent row */
+.a-row {
+  display:flex; align-items:center; gap:10px;
+  padding:8px 0; border-bottom:1px solid #111;
+}
+.a-row:last-child { border-bottom:none; }
+.a-rank { font-size:11px; color:#333; font-weight:700; width:20px; text-align:center; }
+.a-rank.g { color:#319B42; }
+.a-info { flex:1; }
+.a-name2 { font-size:12px; font-weight:700; color:#e0e0e0; }
+.a-org2 { font-size:10px; color:#333; }
+.a-amt { font-size:12px; font-weight:800; color:#319B42; }
+
+/* Build pills */
+.pill-row { display:flex; flex-wrap:wrap; gap:8px; }
+.pill {
+  padding:6px 14px; border-radius:8px; font-size:11px; font-weight:700;
+  display:flex; align-items:center; gap:6px;
+}
+.pill.live { background:#0a1a0e; border:1px solid #1a3a1e; color:#319B42; }
+.pill.wip  { background:#111; border:1px solid #222; color:#555; }
+.pill-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+
+/* Link list */
+.lk2 {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 0; border-bottom:1px solid #111;
+  font-size:12px; color:rgba(255,255,255,0.5); cursor:pointer;
+  transition:color 0.15s;
+}
+.lk2:last-child { border:none; }
+.lk2:hover { color:#fff; }
+.lk2-badge {
+  font-size:8px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+  padding:2px 6px; border-radius:4px;
+  background:rgba(49,155,66,0.1); color:#319B42; border:1px solid rgba(49,155,66,0.2);
+}
+
+/* Big text hero block */
+.hero-text {
+  font-size: 48px; font-weight: 900; color: #fff; line-height: 1.1;
+  letter-spacing: -1.5px;
+}
+.hero-text em { color: #319B42; font-style: normal; }
+
+/* Status indicator */
+.status-row { display:flex; align-items:center; gap:8px; }
+.status-pip { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.status-pip.on { background:#319B42; box-shadow:0 0 10px #319B42; }
+.status-pip.off { background:#333; }
+.status-label { font-size:11px; font-weight:600; }
+.status-label.on { color:#319B42; }
+.status-label.off { color:#333; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-left">
+    <div class="nav-pip"></div>
+    <div class="nav-name">Mothership</div>
+  </div>
+  <div class="nav-right">Waisman Organization · Powered by Zero ⚡ · Mar 27 2026</div>
+</div>
+
+<div class="bento">
+
+  <!-- Hero text block -->
+  <div class="block col-5" style="padding:32px">
+    <div class="num-label">Command Center</div>
+    <div class="hero-text">Waisman<br><em>Org</em><br>2026</div>
+    <div style="margin-top:20px;font-size:11px;color:#333;letter-spacing:1px">3 AGENCIES · 134 AGENTS · 6 BUILDS LIVE</div>
+  </div>
+
+  <!-- Total ALP -->
+  <div class="block col-4 accent-green">
+    <div class="num-label">Total MTD ALP</div>
+    <div class="num-huge green">$173K</div>
+    <div class="num-sub">WO + WG + WP</div>
+  </div>
+
+  <!-- Active agents -->
+  <div class="block col-3">
+    <div class="num-label">Active Agents</div>
+    <div class="num-huge">134</div>
+    <div class="hr"></div>
+    <div style="display:flex;gap:12px">
+      <div><div style="font-size:18px;font-weight:800;color:#3498db">40</div><div style="font-size:9px;color:#333;margin-top:2px;letter-spacing:1px">WO</div></div>
+      <div><div style="font-size:18px;font-weight:800;color:#9b59b6">53</div><div style="font-size:9px;color:#333;margin-top:2px;letter-spacing:1px">WG</div></div>
+      <div><div style="font-size:18px;font-weight:800;color:#2ecc71">41</div><div style="font-size:9px;color:#333;margin-top:2px;letter-spacing:1px">WP</div></div>
+    </div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="block col-6 accent-green">
+    <div class="num-label">Mad Money — Top Agents</div>
+    <div class="a-row">
+      <div class="a-rank g">1</div>
+      <div class="a-info"><div class="a-name2">Alexis Nichols</div><div class="a-org2">WG · SA</div></div>
+      <div class="a-amt">$20,762</div>
+    </div>
+    <div class="a-row">
+      <div class="a-rank g">2</div>
+      <div class="a-info"><div class="a-name2">Damian Davis</div><div class="a-org2">WG · MGA</div></div>
+      <div class="a-amt">$8,136</div>
+    </div>
+    <div class="a-row">
+      <div class="a-rank g">3</div>
+      <div class="a-info"><div class="a-name2">Morgan Clegg</div><div class="a-org2">WG · MGA</div></div>
+      <div class="a-amt">$7,741</div>
+    </div>
+    <div class="a-row">
+      <div class="a-rank">4</div>
+      <div class="a-info"><div class="a-name2">Lisa Richardson</div><div class="a-org2">WO</div></div>
+      <div class="a-amt">$7,316</div>
+    </div>
+    <div class="a-row">
+      <div class="a-rank">5</div>
+      <div class="a-info"><div class="a-name2">Kelly Yingling</div><div class="a-org2">WG</div></div>
+      <div class="a-amt">$6,470</div>
+    </div>
+  </div>
+
+  <!-- Quick links -->
+  <div class="block col-3">
+    <div class="num-label">Quick Links</div>
+    <div class="lk2">March Madness <span class="lk2-badge">LIVE</span></div>
+    <div class="lk2">Lead Tracker <span class="lk2-badge">LIVE</span></div>
+    <div class="lk2" style="color:#2a2a2a">Waisman Platform →</div>
+    <div class="lk2" style="color:#2a2a2a">Policy Form →</div>
+    <div class="lk2" style="color:#2a2a2a">HQ Drive →</div>
+  </div>
+
+  <!-- System status -->
+  <div class="block col-3">
+    <div class="num-label">System Status</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+      <div class="status-row"><div class="status-pip on"></div><div class="status-label on">Brackets — LIVE</div></div>
+      <div class="status-row"><div class="status-pip on"></div><div class="status-label on">Lead Tracker — LIVE</div></div>
+      <div class="status-row"><div class="status-pip on"></div><div class="status-label on">Power Hour — LIVE</div></div>
+      <div class="status-row"><div class="status-pip on"></div><div class="status-label on">Zero Agent — ONLINE</div></div>
+      <div class="status-row"><div class="status-pip off"></div><div class="status-label off">Supabase Auth — PENDING</div></div>
+    </div>
+  </div>
+
+  <!-- Builds -->
+  <div class="block col-12">
+    <div class="num-label" style="margin-bottom:14px">Waisman Org Builds</div>
+    <div class="pill-row">
+      <div class="pill live"><div class="pill-dot"></div>Power Hour Bot</div>
+      <div class="pill live"><div class="pill-dot"></div>March Madness + Auction</div>
+      <div class="pill live"><div class="pill-dot"></div>Lead Tracking System</div>
+      <div class="pill live"><div class="pill-dot"></div>Client Comms System</div>
+      <div class="pill live"><div class="pill-dot"></div>Social Video Engine</div>
+      <div class="pill live"><div class="pill-dot"></div>MGA Bonus Tracker</div>
+      <div class="pill wip"><div class="pill-dot"></div>Recruiting Automation</div>
+      <div class="pill wip"><div class="pill-dot"></div>GHL Integration</div>
+      <div class="pill wip"><div class="pill-dot"></div>Twilio Auto Dialer</div>
+      <div class="pill wip"><div class="pill-dot"></div>Content Calendar</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

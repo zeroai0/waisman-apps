@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:#060912; color:#fff; min-height:100vh; overflow-x:hidden; }
+
+/* Animated grid bg */
+body::before {
+  content:'';
+  position:fixed;inset:0;pointer-events:none;
+  background:
+    linear-gradient(rgba(0,85,140,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,85,140,0.08) 1px, transparent 1px);
+  background-size:48px 48px;
+  animation:grid-move 20s linear infinite;
+}
+@keyframes grid-move { to{ background-position:48px 48px; } }
+
+/* Top stripe */
+.top-stripe { height:3px; background:linear-gradient(90deg, #00558C, #319B42, #00558C); }
+
+/* Nav */
+.nav { display:flex; align-items:center; justify-content:space-between; padding:14px 28px; border-bottom:1px solid rgba(0,85,140,0.2); position:relative; z-index:1; }
+.nav-left { display:flex; align-items:center; gap:16px; }
+.nav-logo-text { font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; letter-spacing:2px; }
+.nav-logo-text em { color:#319B42; font-style:normal; }
+.nav-center { display:flex; gap:6px; }
+.nav-tab { padding:6px 16px; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; border:1px solid rgba(255,255,255,0.08); border-radius:6px; color:rgba(255,255,255,0.3); cursor:pointer; transition:all 0.2s; }
+.nav-tab.active { background:rgba(49,155,66,0.12); border-color:rgba(49,155,66,0.3); color:#319B42; }
+.nav-right { font-size:10px; color:rgba(255,255,255,0.2); letter-spacing:2px; }
+
+/* Main layout */
+.main { display:grid; grid-template-columns:280px 1fr; min-height:calc(100vh - 70px); }
+
+/* Left sidebar */
+.sidebar { border-right:1px solid rgba(0,85,140,0.2); padding:20px 0; position:relative; z-index:1; }
+.sidebar-section { padding:0 20px 20px; border-bottom:1px solid rgba(0,85,140,0.1); margin-bottom:20px; }
+.sidebar-label { font-size:9px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,0.2); margin-bottom:12px; }
+
+/* Big meter */
+.meter-block { margin-bottom:14px; }
+.meter-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+.meter-name { font-size:12px; font-weight:600; color:rgba(255,255,255,0.7); }
+.meter-val { font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; color:#319B42; }
+.meter-bar { height:3px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+.meter-fill { height:100%; border-radius:3px; }
+.fill-g { background:linear-gradient(90deg,#319B42,#5dd879); }
+.fill-b { background:linear-gradient(90deg,#00558C,#3498db); }
+.fill-p { background:linear-gradient(90deg,#9b59b6,#c39bd3); }
+
+/* Org pills */
+.org-pills { display:flex; flex-direction:column; gap:8px; }
+.org-pill { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:10px; border:1px solid; cursor:pointer; }
+.org-pill.wo { background:rgba(52,152,219,0.06); border-color:rgba(52,152,219,0.2); }
+.org-pill.wg { background:rgba(155,89,182,0.06); border-color:rgba(155,89,182,0.2); }
+.org-pill.wp { background:rgba(49,155,66,0.06); border-color:rgba(49,155,66,0.2); }
+.org-pill-name { font-size:12px; font-weight:700; }
+.org-pill.wo .org-pill-name { color:#3498db; }
+.org-pill.wg .org-pill-name { color:#9b59b6; }
+.org-pill.wp .org-pill-name { color:#319B42; }
+.org-pill-stat { font-family:'Rajdhani',sans-serif; font-size:16px; font-weight:700; color:#fff; }
+.org-pill-sub { font-size:9px; color:rgba(255,255,255,0.3); }
+
+/* System dots */
+.sys-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.sys-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.sys-dot.on { background:#319B42; box-shadow:0 0 8px #319B42; }
+.sys-dot.dim { background:#1a2a3a; }
+.sys-name { font-size:11px; color:rgba(255,255,255,0.5); flex:1; }
+.sys-status { font-size:9px; font-weight:700; letter-spacing:1px; }
+.sys-status.on { color:#319B42; }
+.sys-status.dim { color:#1a2a3a; }
+
+/* Right content area */
+.content-area { padding:24px 28px; position:relative; z-index:1; }
+
+/* Horizontal filmstrip of agents */
+.filmstrip-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.filmstrip-title { font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; color:#fff; letter-spacing:1px; }
+.filmstrip-badge { font-size:10px; font-weight:700; letter-spacing:2px; padding:4px 10px; border-radius:6px; background:rgba(49,155,66,0.1); color:#319B42; border:1px solid rgba(49,155,66,0.25); }
+.filmstrip { display:flex; gap:12px; overflow-x:auto; padding-bottom:4px; margin-bottom:28px; }
+.filmstrip::-webkit-scrollbar { height:2px; }
+.filmstrip::-webkit-scrollbar-track { background:transparent; }
+.filmstrip::-webkit-scrollbar-thumb { background:rgba(49,155,66,0.3); }
+.agent-card {
+  flex-shrink:0; width:140px;
+  border:1px solid rgba(255,255,255,0.07); border-radius:14px;
+  padding:16px 14px; background:rgba(255,255,255,0.02);
+  position:relative; overflow:hidden; transition:all 0.2s;
+}
+.agent-card:hover { border-color:rgba(49,155,66,0.3); background:rgba(49,155,66,0.04); }
+.agent-card.top1 { border-color:rgba(245,197,24,0.3); background:rgba(245,197,24,0.04); }
+.agent-card::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; }
+.agent-card.top1::before { background:#f5c518; }
+.agent-card.top2::before { background:#aaa; }
+.agent-card.top3::before { background:#cd7f32; }
+.ac-rank { font-size:20px; margin-bottom:8px; }
+.ac-name { font-size:12px; font-weight:700; color:#fff; line-height:1.2; margin-bottom:4px; }
+.ac-org { font-size:10px; color:rgba(255,255,255,0.3); }
+.ac-val { font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; color:#319B42; margin-top:10px; }
+.ac-val.gold { color:#f5c518; }
+
+/* Quick links horizontal */
+.links-strip { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:28px; }
+.link-chip { display:flex; align-items:center; gap:8px; padding:8px 16px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; font-size:11px; color:rgba(255,255,255,0.5); cursor:pointer; transition:all 0.2s; text-decoration:none; }
+.link-chip:hover { border-color:rgba(49,155,66,0.3); color:#fff; }
+.link-chip .ld { width:6px; height:6px; border-radius:50%; }
+.link-chip .ld.on { background:#319B42; box-shadow:0 0 6px #319B42; }
+.link-chip .ld.off { background:#333; }
+
+/* Builds grid */
+.builds-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+.build-item { border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:12px; text-align:center; transition:all 0.2s; }
+.build-item:hover { border-color:rgba(49,155,66,0.2); }
+.build-item.live { border-color:rgba(49,155,66,0.15); background:rgba(49,155,66,0.03); }
+.build-icon { font-size:20px; margin-bottom:6px; }
+.build-name { font-size:10px; font-weight:600; color:rgba(255,255,255,0.6); }
+.build-item.live .build-name { color:rgba(255,255,255,0.8); }
+.b-live { font-size:8px; font-weight:700; color:#319B42; margin-top:4px; }
+.b-plan { font-size:8px; color:#333; margin-top:4px; }
+</style>
+</head>
+<body>
+<div class="top-stripe"></div>
+<nav class="nav">
+  <div class="nav-left">
+    <div class="nav-logo-text">WAISMAN<em>SHIP</em></div>
+    <div class="nav-center">
+      <div class="nav-tab active">Overview</div>
+      <div class="nav-tab">Agents</div>
+      <div class="nav-tab">Builds</div>
+      <div class="nav-tab">Finance</div>
+    </div>
+  </div>
+  <div class="nav-right">POWERED BY ZERO ⚡ · MAR 27 2026</div>
+</nav>
+
+<div class="main">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Org Performance</div>
+      <div class="meter-block">
+        <div class="meter-top"><div class="meter-name">Total MTD ALP</div><div class="meter-val">$173K</div></div>
+        <div class="meter-bar"><div class="meter-fill fill-g" style="width:58%"></div></div>
+      </div>
+      <div class="meter-block">
+        <div class="meter-top"><div class="meter-name">Total Leads</div><div class="meter-val">12,380</div></div>
+        <div class="meter-bar"><div class="meter-fill fill-b" style="width:72%"></div></div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Agencies</div>
+      <div class="org-pills">
+        <div class="org-pill wo">
+          <div><div class="org-pill-name">🔵 WO</div><div class="org-pill-sub">40 agents</div></div>
+          <div><div class="org-pill-stat">$42K</div></div>
+        </div>
+        <div class="org-pill wg">
+          <div><div class="org-pill-name">🟣 WG</div><div class="org-pill-sub">53 agents</div></div>
+          <div><div class="org-pill-stat">$94K</div></div>
+        </div>
+        <div class="org-pill wp">
+          <div><div class="org-pill-name">🟢 WP</div><div class="org-pill-sub">41 agents</div></div>
+          <div><div class="org-pill-stat">$37K</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-section" style="border:none;margin:0">
+      <div class="sidebar-label">System Status</div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Brackets Site</div><div class="sys-status on">LIVE</div></div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Lead Tracker</div><div class="sys-status on">LIVE</div></div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Power Hour Bot</div><div class="sys-status on">LIVE</div></div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Zero Agent</div><div class="sys-status on">ONLINE</div></div>
+      <div class="sys-row"><div class="sys-dot dim"></div><div class="sys-name">Supabase Auth</div><div class="sys-status dim">PENDING</div></div>
+      <div class="sys-row"><div class="sys-dot dim"></div><div class="sys-name">GHL Integration</div><div class="sys-status dim">PLANNED</div></div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-area">
+    <div class="filmstrip-header">
+      <div class="filmstrip-title">MAD MONEY — TOP AGENTS</div>
+      <div class="filmstrip-badge">MARCH 2026</div>
+    </div>
+    <div class="filmstrip">
+      <div class="agent-card top1"><div class="ac-rank">🥇</div><div class="ac-name">Alexis Nichols</div><div class="ac-org">WG · SA</div><div class="ac-val gold">$20,762</div></div>
+      <div class="agent-card top2"><div class="ac-rank">🥈</div><div class="ac-name">Damian Davis</div><div class="ac-org">WG · MGA</div><div class="ac-val">$8,136</div></div>
+      <div class="agent-card top3"><div class="ac-rank">🥉</div><div class="ac-name">Morgan Clegg</div><div class="ac-org">WG · MGA</div><div class="ac-val">$7,741</div></div>
+      <div class="agent-card"><div class="ac-rank" style="font-size:14px;color:#555">#4</div><div class="ac-name">Lisa Richardson</div><div class="ac-org">WO</div><div class="ac-val">$7,316</div></div>
+      <div class="agent-card"><div class="ac-rank" style="font-size:14px;color:#555">#5</div><div class="ac-name">Kelly Yingling</div><div class="ac-org">WG</div><div class="ac-val">$6,470</div></div>
+      <div class="agent-card"><div class="ac-rank" style="font-size:14px;color:#555">#6</div><div class="ac-name">Amanda Finch</div><div class="ac-org">WO</div><div class="ac-val">$5,981</div></div>
+      <div class="agent-card"><div class="ac-rank" style="font-size:14px;color:#555">#7</div><div class="ac-name">Katrina Bailey</div><div class="ac-org">WO</div><div class="ac-val">$5,178</div></div>
+    </div>
+
+    <div class="filmstrip-header" style="margin-bottom:12px">
+      <div class="filmstrip-title">QUICK LINKS</div>
+    </div>
+    <div class="links-strip" style="margin-bottom:28px">
+      <a class="link-chip"><div class="ld on"></div>March Madness</a>
+      <a class="link-chip"><div class="ld on"></div>Lead Tracker</a>
+      <a class="link-chip"><div class="ld on"></div>Waisman Platform</a>
+      <a class="link-chip"><div class="ld on"></div>Policy Form</a>
+      <a class="link-chip"><div class="ld off"></div>HQ Drive</a>
+      <a class="link-chip"><div class="ld off"></div>Supabase</a>
+    </div>
+
+    <div class="filmstrip-header" style="margin-bottom:12px">
+      <div class="filmstrip-title">ORG BUILDS</div>
+    </div>
+    <div class="builds-grid">
+      <div class="build-item live"><div class="build-icon">⚡</div><div class="build-name">Power Hour Bot</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">🏀</div><div class="build-name">March Madness</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">📊</div><div class="build-name">Lead Tracker</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">📋</div><div class="build-name">Client Comms</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">🎬</div><div class="build-name">Video Engine</div><div class="b-live">LIVE</div></div>
+      <div class="build-item"><div class="build-icon">🔗</div><div class="build-name">GHL Integration</div><div class="b-plan">PLANNED</div></div>
+      <div class="build-item"><div class="build-icon">🧲</div><div class="build-name">Recruiting Auto</div><div class="b-plan">PLANNED</div></div>
+      <div class="build-item"><div class="build-icon">📞</div><div class="build-name">Auto Dialer</div><div class="b-plan">PLANNED</div></div>
+      <div class="build-item"><div class="build-icon">📅</div><div class="build-name">Content Cal</div><div class="b-plan">PLANNED</div></div>
+      <div class="build-item"><div class="build-icon">📡</div><div class="build-name">Twilio</div><div class="b-plan">FUTURE</div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'JetBrains Mono',monospace; background:#000; color:#00ff41; min-height:100vh; padding:24px; }
+
+.scanline {
+  position:fixed; inset:0; pointer-events:none; z-index:100;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+}
+.glow-overlay { position:fixed; inset:0; pointer-events:none; background:radial-gradient(ellipse at center, rgba(0,255,65,0.03) 0%, transparent 70%); }
+
+.header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+.title { font-size:18px; font-weight:800; color:#00ff41; text-shadow:0 0 20px #00ff41; }
+.status-bar { font-size:10px; color:rgba(0,255,65,0.4); letter-spacing:2px; }
+
+.box { border:1px solid rgba(0,255,65,0.2); padding:20px; margin-bottom:12px; position:relative; }
+.box::before { content:''; position:absolute; top:-1px; left:20px; width:60px; height:2px; background:#00ff41; box-shadow:0 0 10px #00ff41; }
+.box-label { position:absolute; top:-10px; left:28px; font-size:9px; font-weight:700; letter-spacing:3px; background:#000; padding:0 6px; color:rgba(0,255,65,0.6); text-transform:uppercase; }
+
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; }
+.grid2 { display:grid; grid-template-columns:2fr 1fr; gap:12px; }
+
+.num-big { font-size:48px; font-weight:800; color:#00ff41; text-shadow:0 0 30px #00ff41; line-height:1; }
+.num-label { font-size:9px; color:rgba(0,255,65,0.4); letter-spacing:3px; margin-bottom:8px; }
+.num-sub { font-size:10px; color:rgba(0,255,65,0.5); margin-top:6px; }
+
+.agent-line { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid rgba(0,255,65,0.07); font-size:12px; }
+.agent-line:last-child { border:none; }
+.agent-rank { color:rgba(0,255,65,0.3); width:24px; }
+.agent-name { flex:1; color:#fff; }
+.agent-org { color:rgba(0,255,65,0.3); width:30px; font-size:10px; }
+.agent-val { color:#00ff41; text-shadow:0 0 10px #00ff41; font-weight:700; }
+
+.progress-row { margin-bottom:10px; }
+.prog-label { display:flex; justify-content:space-between; font-size:10px; color:rgba(0,255,65,0.5); margin-bottom:4px; }
+.prog-bar { height:2px; background:rgba(0,255,65,0.1); }
+.prog-fill { height:100%; background:#00ff41; box-shadow:0 0 8px #00ff41; }
+
+.link-row { font-size:11px; padding:5px 0; border-bottom:1px solid rgba(0,255,65,0.06); display:flex; justify-content:space-between; }
+.link-row .live { color:#00ff41; }
+.link-row .pending { color:rgba(0,255,65,0.2); }
+
+.blinking { animation: blink 1s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.builds-row { display:flex; flex-wrap:wrap; gap:8px; }
+.build-chip { font-size:10px; padding:3px 10px; border:1px solid rgba(0,255,65,0.3); color:rgba(0,255,65,0.7); }
+.build-chip.live { border-color:#00ff41; color:#00ff41; text-shadow:0 0 8px #00ff41; }
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+<div class="glow-overlay"></div>
+
+<div class="header">
+  <div>
+    <div class="title">WAISMAN_MOTHERSHIP<span class="blinking">_</span></div>
+    <div class="status-bar" style="margin-top:4px">>> CONNECTED · ZERO AI ONLINE · 2026-03-27 21:54</div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:10px;color:rgba(0,255,65,0.4)">SYS STATUS</div>
+    <div style="font-size:11px;color:#00ff41;text-shadow:0 0 10px #00ff41">● ALL SYSTEMS GO</div>
+  </div>
+</div>
+
+<div class="grid3">
+  <div class="box">
+    <div class="box-label">MTD_ALP</div>
+    <div class="num-label">Total MTD ALP</div>
+    <div class="num-big">$173K</div>
+    <div class="num-sub">> WO+WG+WP combined</div>
+  </div>
+  <div class="box">
+    <div class="box-label">AGENTS</div>
+    <div class="num-label">Active Agents</div>
+    <div class="num-big">134</div>
+    <div class="num-sub">> 40 · 53 · 41</div>
+  </div>
+  <div class="box">
+    <div class="box-label">BUILDS</div>
+    <div class="num-label">Live Builds</div>
+    <div class="num-big">6</div>
+    <div class="num-sub">> +2 today</div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="box">
+    <div class="box-label">LEADERBOARD</div>
+    <div class="num-label">MAD_MONEY // TOP AGENTS BY NET ALP</div>
+    <div class="agent-line"><div class="agent-rank">01</div><div class="agent-name">Alexis Nichols</div><div class="agent-org">WG</div><div class="agent-val">$20,762</div></div>
+    <div class="agent-line"><div class="agent-rank">02</div><div class="agent-name">Damian Davis</div><div class="agent-org">WG</div><div class="agent-val">$8,136</div></div>
+    <div class="agent-line"><div class="agent-rank">03</div><div class="agent-name">Morgan Clegg</div><div class="agent-org">WG</div><div class="agent-val">$7,741</div></div>
+    <div class="agent-line"><div class="agent-rank">04</div><div class="agent-name">Lisa Richardson</div><div class="agent-org">WO</div><div class="agent-val">$7,316</div></div>
+    <div class="agent-line"><div class="agent-rank">05</div><div class="agent-name">Kelly Yingling</div><div class="agent-org">WG</div><div class="agent-val">$6,470</div></div>
+    <div style="margin-top:16px">
+      <div class="progress-row"><div class="prog-label"><span>WO ALP</span><span>$42K</span></div><div class="prog-bar"><div class="prog-fill" style="width:24%"></div></div></div>
+      <div class="progress-row"><div class="prog-label"><span>WG ALP</span><span>$94K</span></div><div class="prog-bar"><div class="prog-fill" style="width:54%"></div></div></div>
+      <div class="progress-row"><div class="prog-label"><span>WP ALP</span><span>$37K</span></div><div class="prog-bar"><div class="prog-fill" style="width:21%"></div></div></div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="box" style="flex:1">
+      <div class="box-label">QUICK_LINKS</div>
+      <div class="link-row"><span>brackets.waismanorganization.com</span><span class="live">● LIVE</span></div>
+      <div class="link-row"><span>waisman-leads.vercel.app</span><span class="live">● LIVE</span></div>
+      <div class="link-row"><span>waisman-platform.vercel.app</span><span class="live">● LIVE</span></div>
+      <div class="link-row"><span>waisman-policy-form.vercel.app</span><span class="live">● LIVE</span></div>
+      <div class="link-row"><span>supabase · vjcfbccsybkriefnyvhf</span><span class="live">● LIVE</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="box" style="margin-top:12px">
+  <div class="box-label">BUILDS</div>
+  <div class="num-label">WAISMAN_ORG // DEPLOYED SYSTEMS</div>
+  <div class="builds-row">
+    <div class="build-chip live">[✓] POWER_HOUR_BOT</div>
+    <div class="build-chip live">[✓] MARCH_MADNESS</div>
+    <div class="build-chip live">[✓] LEAD_TRACKER</div>
+    <div class="build-chip live">[✓] CLIENT_COMMS</div>
+    <div class="build-chip live">[✓] VIDEO_ENGINE</div>
+    <div class="build-chip live">[✓] MGA_TRACKER</div>
+    <div class="build-chip">[~] RECRUITING_AUTO</div>
+    <div class="build-chip">[~] GHL_INTEGRATION</div>
+    <div class="build-chip">[~] TWILIO_DIALER</div>
+    <div class="build-chip">[~] CONTENT_CAL</div>
+  </div>
+</div>
+</body>
+</html>

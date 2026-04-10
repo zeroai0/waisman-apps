@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #030712;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Animated gradient orbs */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.25;
+  pointer-events: none;
+}
+.orb1 { width:600px; height:600px; background:#319B42; top:-200px; left:-100px; }
+.orb2 { width:500px; height:500px; background:#00558C; top:100px; right:-150px; }
+.orb3 { width:400px; height:400px; background:#319B42; bottom:-100px; left:40%; }
+
+/* Grid lines bg */
+body::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(49,155,66,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(49,155,66,0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events:none;
+}
+
+.page { position:relative; z-index:1; padding:32px; }
+
+/* Nav */
+.nav {
+  display: flex; align-items:center; justify-content:space-between;
+  margin-bottom: 48px;
+}
+.nav-logo { height: 36px; opacity:0.95; }
+.nav-title {
+  font-size: 11px; font-weight:700; letter-spacing:4px;
+  text-transform:uppercase; color:rgba(255,255,255,0.3);
+}
+.nav-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:#319B42; box-shadow:0 0 12px #319B42;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* Glass panel */
+.glass {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 28px;
+}
+
+.hero-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.stat-panel {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(49,155,66,0.2);
+  border-radius: 16px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-panel::before {
+  content:'';
+  position:absolute;
+  top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, #319B42, transparent);
+}
+.stat-panel::after {
+  content:'';
+  position:absolute;
+  bottom:-30px; right:-30px;
+  width:80px; height:80px; border-radius:50%;
+  background: radial-gradient(circle, rgba(49,155,66,0.15), transparent 70%);
+}
+.stat-label {
+  font-size:10px; font-weight:700; letter-spacing:2px;
+  text-transform:uppercase; color:rgba(255,255,255,0.35);
+  margin-bottom:12px;
+}
+.stat-val {
+  font-size:42px; font-weight:800; color:#fff;
+  letter-spacing:-1px; line-height:1;
+  text-shadow: 0 0 30px rgba(49,155,66,0.4);
+}
+.stat-sub { font-size:11px; color:#319B42; margin-top:8px; font-weight:600; }
+
+.main-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.agent-strip {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.strip-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size:10px; font-weight:700; letter-spacing:3px;
+  text-transform:uppercase; color:rgba(255,255,255,0.3);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.agent-row {
+  display:grid; grid-template-columns:32px 1fr 100px 80px;
+  gap:12px; align-items:center;
+  padding:12px 20px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  transition:background 0.15s;
+}
+.agent-row:hover { background:rgba(255,255,255,0.03); }
+.rank { font-size:11px; color:rgba(255,255,255,0.2); font-weight:700; text-align:center; }
+.rank.top { color:#319B42; font-size:14px; }
+.a-name { font-size:13px; font-weight:600; color:#fff; }
+.a-org { font-size:10px; color:rgba(255,255,255,0.3); margin-top:1px; }
+.a-bar-wrap { height:4px; background:rgba(255,255,255,0.07); border-radius:4px; overflow:hidden; }
+.a-bar { height:100%; background:linear-gradient(90deg,#319B42,#00558C); border-radius:4px; }
+.a-val { font-size:13px; font-weight:700; color:#319B42; text-align:right; }
+
+.links-panel {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  overflow:hidden;
+}
+.link-item {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 20px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  cursor:pointer; transition:background 0.15s;
+}
+.link-item:hover { background:rgba(49,155,66,0.06); }
+.link-dot {
+  width:8px; height:8px; border-radius:50%; flex-shrink:0;
+}
+.link-dot.green { background:#319B42; box-shadow:0 0 8px #319B42; }
+.link-dot.blue { background:#00558C; box-shadow:0 0 8px #00558C; }
+.link-dot.dim { background:#333; }
+.link-name { font-size:12px; font-weight:600; color:#fff; }
+.link-url { font-size:10px; color:rgba(255,255,255,0.3); margin-top:1px; }
+.link-arr { margin-left:auto; color:rgba(255,255,255,0.15); font-size:14px; }
+
+.badge-live {
+  font-size:9px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+  padding:2px 7px; border-radius:6px;
+  background:rgba(49,155,66,0.15); color:#319B42; border:1px solid rgba(49,155,66,0.3);
+  margin-left:auto;
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div class="page">
+  <!-- Nav -->
+  <div class="nav">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="nav-dot"></div>
+      <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:1px">MOTHERSHIP</span>
+    </div>
+    <div class="nav-title">Waisman Organization · Powered by Zero ⚡</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.2)">Mar 27, 2026</div>
+  </div>
+
+  <!-- Hero stats -->
+  <div class="hero-row">
+    <div class="stat-panel">
+      <div class="stat-label">Total MTD ALP</div>
+      <div class="stat-val">$173K</div>
+      <div class="stat-sub">↑ WO · WG · WP combined</div>
+    </div>
+    <div class="stat-panel">
+      <div class="stat-label">Active Agents</div>
+      <div class="stat-val">134</div>
+      <div class="stat-sub">40 · 53 · 41 by org</div>
+    </div>
+    <div class="stat-panel">
+      <div class="stat-label">Builds Live</div>
+      <div class="stat-val">6</div>
+      <div class="stat-sub">↑ 2 shipped today</div>
+    </div>
+  </div>
+
+  <div class="main-row">
+    <!-- Agent leaderboard -->
+    <div class="agent-strip">
+      <div class="strip-header">
+        <span>Mad Money — Top Agents</span>
+        <span style="color:#319B42">LIVE</span>
+      </div>
+      <div class="agent-row">
+        <div class="rank top">🥇</div>
+        <div><div class="a-name">Alexis Nichols</div><div class="a-org">WG · SA</div></div>
+        <div class="a-bar-wrap"><div class="a-bar" style="width:100%"></div></div>
+        <div class="a-val">$20,762</div>
+      </div>
+      <div class="agent-row">
+        <div class="rank top">🥈</div>
+        <div><div class="a-name">Damian Davis</div><div class="a-org">WG · MGA</div></div>
+        <div class="a-bar-wrap"><div class="a-bar" style="width:39%"></div></div>
+        <div class="a-val">$8,136</div>
+      </div>
+      <div class="agent-row">
+        <div class="rank top">🥉</div>
+        <div><div class="a-name">Morgan Clegg</div><div class="a-org">WG · MGA</div></div>
+        <div class="a-bar-wrap"><div class="a-bar" style="width:37%"></div></div>
+        <div class="a-val">$7,741</div>
+      </div>
+      <div class="agent-row">
+        <div class="rank">#4</div>
+        <div><div class="a-name">Lisa Richardson</div><div class="a-org">WO</div></div>
+        <div class="a-bar-wrap"><div class="a-bar" style="width:35%"></div></div>
+        <div class="a-val">$7,316</div>
+      </div>
+      <div class="agent-row">
+        <div class="rank">#5</div>
+        <div><div class="a-name">Kelly Yingling</div><div class="a-org">WG</div></div>
+        <div class="a-bar-wrap"><div class="a-bar" style="width:31%"></div></div>
+        <div class="a-val">$6,470</div>
+      </div>
+    </div>
+
+    <!-- Quick links -->
+    <div class="links-panel">
+      <div class="strip-header">Quick Links</div>
+      <div class="link-item">
+        <div class="link-dot green"></div>
+        <div><div class="link-name">March Madness</div><div class="link-url">brackets.waismanorganization.com</div></div>
+        <div class="badge-live">LIVE</div>
+        <div class="link-arr">→</div>
+      </div>
+      <div class="link-item">
+        <div class="link-dot green"></div>
+        <div><div class="link-name">Lead Tracker</div><div class="link-url">waisman-leads.vercel.app</div></div>
+        <div class="badge-live">LIVE</div>
+        <div class="link-arr">→</div>
+      </div>
+      <div class="link-item">
+        <div class="link-dot blue"></div>
+        <div><div class="link-name">Waisman Platform</div><div class="link-url">waisman-platform.vercel.app</div></div>
+        <div class="link-arr">→</div>
+      </div>
+      <div class="link-item">
+        <div class="link-dot blue"></div>
+        <div><div class="link-name">Policy Form</div><div class="link-url">waisman-policy-form.vercel.app</div></div>
+        <div class="link-arr">→</div>
+      </div>
+      <div class="link-item">
+        <div class="link-dot dim"></div>
+        <div><div class="link-name">HQ Google Drive</div><div class="link-url">drive.google.com</div></div>
+        <div class="link-arr">→</div>
+      </div>
+      <div class="link-item">
+        <div class="link-dot dim"></div>
+        <div><div class="link-name">Supabase</div><div class="link-url">supabase.co</div></div>
+        <div class="link-arr">→</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

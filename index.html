@@ -1,829 +1,335 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Mothership</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:#060912; color:#fff; min-height:100vh; overflow-x:hidden; }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+/* Animated grid bg */
+body::before {
+  content:'';
+  position:fixed;inset:0;pointer-events:none;
+  background:
+    linear-gradient(rgba(0,85,140,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,85,140,0.08) 1px, transparent 1px);
+  background-size:48px 48px;
+  animation:grid-move 20s linear infinite;
+}
+@keyframes grid-move { to{ background-position:48px 48px; } }
 
-    :root {
-      --bg: #080808;
-      --bg2: #0f0f0f;
-      --bg3: #161616;
-      --bg4: #1e1e1e;
-      --border: rgba(255,255,255,0.07);
-      --border-bright: rgba(255,255,255,0.14);
-      --accent: #c8c8c8;
-      --accent2: #888;
-      --accent3: #444;
-      --green: #2ecc71;
-      --green-dim: rgba(46,204,113,0.15);
-      --green-glow: rgba(46,204,113,0.35);
-      --blue: #3498db;
-      --blue-dim: rgba(52,152,219,0.12);
-      --text: #e8e8e8;
-      --text2: #777;
-      --text3: #333;
-    }
+/* Top stripe */
+.top-stripe { height:3px; background:linear-gradient(90deg, #00558C, #319B42, #00558C); }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+/* Nav */
+.nav { display:flex; align-items:center; justify-content:space-between; padding:14px 28px; border-bottom:1px solid rgba(0,85,140,0.2); position:relative; z-index:1; }
+.nav-left { display:flex; align-items:center; gap:16px; }
+.nav-logo-text { font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; letter-spacing:2px; }
+.nav-logo-text em { color:#319B42; font-style:normal; }
+.nav-center { display:flex; gap:6px; }
+.nav-tab { padding:6px 16px; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; border:1px solid rgba(255,255,255,0.08); border-radius:6px; color:rgba(255,255,255,0.3); cursor:pointer; transition:all 0.2s; }
+.nav-tab.active { background:rgba(49,155,66,0.12); border-color:rgba(49,155,66,0.3); color:#319B42; }
+.nav-right { font-size:10px; color:rgba(255,255,255,0.2); letter-spacing:2px; }
 
-    /* INTERACTIVE CANVAS */
-    #neural-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
+/* Main layout */
+.main { display:grid; grid-template-columns:280px 1fr; min-height:calc(100vh - 70px); }
 
-    /* MOUSE INTERACTIVE OVERLAY */
-    #mouse-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.6;
-    }
+/* Left sidebar */
+.sidebar { border-right:1px solid rgba(0,85,140,0.2); padding:20px 0; position:relative; z-index:1; }
+.sidebar-section { padding:0 20px 20px; border-bottom:1px solid rgba(0,85,140,0.1); margin-bottom:20px; }
+.sidebar-label { font-size:9px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,0.2); margin-bottom:12px; }
 
-    .page { position: relative; z-index: 1; }
+/* Big meter */
+.meter-block { margin-bottom:14px; }
+.meter-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+.meter-name { font-size:12px; font-weight:600; color:rgba(255,255,255,0.7); }
+.meter-val { font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; color:#319B42; }
+.meter-bar { height:3px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+.meter-fill { height:100%; border-radius:3px; }
+.fill-g { background:linear-gradient(90deg,#319B42,#5dd879); }
+.fill-b { background:linear-gradient(90deg,#00558C,#3498db); }
+.fill-p { background:linear-gradient(90deg,#9b59b6,#c39bd3); }
 
-    /* HEADER */
-    header {
-      text-align: center;
-      padding: 72px 24px 48px;
-      position: relative;
-    }
+/* Org pills */
+.org-pills { display:flex; flex-direction:column; gap:8px; }
+.org-pill { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:10px; border:1px solid; cursor:pointer; }
+.org-pill.wo { background:rgba(52,152,219,0.06); border-color:rgba(52,152,219,0.2); }
+.org-pill.wg { background:rgba(155,89,182,0.06); border-color:rgba(155,89,182,0.2); }
+.org-pill.wp { background:rgba(49,155,66,0.06); border-color:rgba(49,155,66,0.2); }
+.org-pill-name { font-size:12px; font-weight:700; }
+.org-pill.wo .org-pill-name { color:#3498db; }
+.org-pill.wg .org-pill-name { color:#9b59b6; }
+.org-pill.wp .org-pill-name { color:#319B42; }
+.org-pill-stat { font-family:'Rajdhani',sans-serif; font-size:16px; font-weight:700; color:#fff; }
+.org-pill-sub { font-size:9px; color:rgba(255,255,255,0.3); }
 
-    .header-top {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-    }
-    .h-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent2);
-      border: 1px solid var(--border-bright);
-      border-radius: 20px;
-      padding: 5px 14px;
-    }
-    .h-pill-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 6px var(--green-glow);
-      animation: blink 1.5s ease-in-out infinite;
-    }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+/* System dots */
+.sys-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.sys-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.sys-dot.on { background:#319B42; box-shadow:0 0 8px #319B42; }
+.sys-dot.dim { background:#1a2a3a; }
+.sys-name { font-size:11px; color:rgba(255,255,255,0.5); flex:1; }
+.sys-status { font-size:9px; font-weight:700; letter-spacing:1px; }
+.sys-status.on { color:#319B42; }
+.sys-status.dim { color:#1a2a3a; }
 
-    h1 {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: clamp(64px, 13vw, 130px);
-      font-weight: 700;
-      letter-spacing: -2px;
-      line-height: 0.9;
-      color: var(--text);
-      margin-bottom: 20px;
-      text-shadow: 0 0 120px rgba(255,255,255,0.04);
-    }
-    h1 .sub-word { color: var(--accent3); }
+/* Right content area */
+.content-area { padding:24px 28px; position:relative; z-index:1; }
 
-    .tagline {
-      font-size: 13px;
-      color: var(--text2);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-    }
-    .tagline em { color: var(--green); font-style: normal; }
+/* Horizontal filmstrip of agents */
+.filmstrip-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.filmstrip-title { font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; color:#fff; letter-spacing:1px; }
+.filmstrip-badge { font-size:10px; font-weight:700; letter-spacing:2px; padding:4px 10px; border-radius:6px; background:rgba(49,155,66,0.1); color:#319B42; border:1px solid rgba(49,155,66,0.25); }
+.filmstrip { display:flex; gap:12px; overflow-x:auto; padding-bottom:4px; margin-bottom:28px; }
+.filmstrip::-webkit-scrollbar { height:2px; }
+.filmstrip::-webkit-scrollbar-track { background:transparent; }
+.filmstrip::-webkit-scrollbar-thumb { background:rgba(49,155,66,0.3); }
+.agent-card {
+  flex-shrink:0; width:140px;
+  border:1px solid rgba(255,255,255,0.07); border-radius:14px;
+  padding:16px 14px; background:rgba(255,255,255,0.02);
+  position:relative; overflow:hidden; transition:all 0.2s;
+}
+.agent-card:hover { border-color:rgba(49,155,66,0.3); background:rgba(49,155,66,0.04); }
+.agent-card.top1 { border-color:rgba(245,197,24,0.3); background:rgba(245,197,24,0.04); }
+.agent-card::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; }
+.agent-card.top1::before { background:#f5c518; }
+.agent-card.top2::before { background:#aaa; }
+.agent-card.top3::before { background:#cd7f32; }
+.ac-rank { font-size:20px; margin-bottom:8px; }
+.ac-name { font-size:12px; font-weight:700; color:#fff; line-height:1.2; margin-bottom:4px; }
+.ac-org { font-size:10px; color:rgba(255,255,255,0.3); }
+.ac-val { font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; color:#319B42; margin-top:10px; }
+.ac-val.gold { color:#f5c518; }
 
-    /* COUNTER STRIP */
-    .counter-strip {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
-      margin: 40px auto 0;
-      max-width: 700px;
-      border: 1px solid var(--border-bright);
-      border-radius: 12px;
-      overflow: hidden;
-      background: var(--bg2);
-    }
-    .counter-item {
-      flex: 1;
-      text-align: center;
-      padding: 20px 16px;
-      border-right: 1px solid var(--border);
-      position: relative;
-    }
-    .counter-item:last-child { border-right: none; }
-    .counter-item::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--green);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .counter-item:hover::before { opacity: 1; }
-    .counter-num {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 48px;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1;
-      counter-reset: num var(--n);
-    }
-    .counter-num.green { color: var(--green); text-shadow: 0 0 20px var(--green-glow); }
-    .counter-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+/* Quick links horizontal */
+.links-strip { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:28px; }
+.link-chip { display:flex; align-items:center; gap:8px; padding:8px 16px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; font-size:11px; color:rgba(255,255,255,0.5); cursor:pointer; transition:all 0.2s; text-decoration:none; }
+.link-chip:hover { border-color:rgba(49,155,66,0.3); color:#fff; }
+.link-chip .ld { width:6px; height:6px; border-radius:50%; }
+.link-chip .ld.on { background:#319B42; box-shadow:0 0 6px #319B42; }
+.link-chip .ld.off { background:#333; }
 
-    /* MAIN GRID */
-    .grid {
-      max-width: 1380px;
-      margin: 0 auto;
-      padding: 0 20px 100px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-    }
-    @media(max-width:900px){ .grid{ grid-template-columns:1fr; } }
-    @media(max-width:1200px) and (min-width:900px){ .grid{ grid-template-columns:1fr 1fr; } }
-
-    /* PANEL */
-    .panel {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px;
-      position: relative;
-      overflow: hidden;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    .panel:hover {
-      border-color: var(--border-bright);
-      box-shadow: 0 0 40px rgba(255,255,255,0.02);
-    }
-    .panel::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-    }
-    .panel.full { grid-column: span 3; }
-    .panel.wide { grid-column: span 2; }
-    @media(max-width:1200px){ .panel.full,.panel.wide{ grid-column:span 1; } }
-
-    .panel-label {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--text3);
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .panel-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    /* AGENTS GRID */
-    .agent-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
-    @media(max-width:600px){ .agent-grid{ grid-template-columns:1fr 1fr; } }
-
-    .agent-card {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px 14px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.25s;
-      cursor: default;
-    }
-    .agent-card::after {
-      content:'';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--green);
-      transform: scaleX(0);
-      transition: transform 0.3s;
-    }
-    .agent-card:hover { border-color: rgba(255,255,255,0.1); transform: translateY(-2px); }
-    .agent-card:hover::after { transform: scaleX(1); }
-    .agent-card.is-active {
-      border-color: rgba(46,204,113,0.25);
-      background: rgba(46,204,113,0.04);
-      box-shadow: 0 0 24px rgba(46,204,113,0.08);
-    }
-    .agent-card.is-active::after { transform: scaleX(1); }
-
-    .agent-orb {
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      background: var(--bg4);
-      border: 1px solid var(--border-bright);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      margin: 0 auto 10px;
-      transition: all 0.3s;
-    }
-    .agent-card.is-active .agent-orb {
-      border-color: rgba(46,204,113,0.4);
-      box-shadow: 0 0 20px rgba(46,204,113,0.2);
-      animation: orb-pulse 2s ease-in-out infinite;
-    }
-    @keyframes orb-pulse { 0%,100%{box-shadow:0 0 20px rgba(46,204,113,0.2)} 50%{box-shadow:0 0 35px rgba(46,204,113,0.4)} }
-
-    .agent-name {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: 1px;
-    }
-    .agent-role { font-size: 10px; color: var(--text3); margin: 3px 0 8px; }
-    .agent-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      padding: 3px 9px;
-      border-radius: 10px;
-    }
-    .s-active { background: rgba(46,204,113,0.12); color: var(--green); border: 1px solid rgba(46,204,113,0.2); }
-    .s-idle { background: rgba(255,255,255,0.04); color: var(--text3); border: 1px solid var(--border); }
-    .s-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
-    .s-active .s-dot { animation: blink 1s ease-in-out infinite; }
-    .agent-last { font-size: 9px; color: var(--text3); margin-top: 5px; }
-
-    /* POWER HOUR */
-    .ph-split { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; }
-    .ph-lbl { font-size: 9px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
-    .ph-num {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 56px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -2px;
-      line-height: 1;
-    }
-    .ph-num.live { color: var(--green); text-shadow: 0 0 30px var(--green-glow); }
-    .ph-sub { font-size: 11px; color: var(--text3); margin-top: 6px; }
-    .ph-bar { width: 100%; height: 2px; background: var(--border); border-radius: 2px; margin-top: 14px; overflow: hidden; }
-    .ph-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--green), var(--blue)); transition: width 1s linear; }
-
-    .scoring { display: flex; flex-direction: column; gap: 5px; }
-    .sc-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      transition: border-color 0.2s;
-    }
-    .sc-row:hover { border-color: var(--border-bright); }
-    .sc-k { font-family: monospace; font-size: 13px; font-weight: 700; color: var(--accent); }
-    .sc-l { font-size: 11px; color: var(--text2); flex: 1; }
-    .sc-p { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
-    .sc-p.green { color: var(--green); }
-
-    /* PROJECTS */
-    .proj-list { display: flex; flex-direction: column; gap: 6px; }
-    .proj {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 9px 12px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      transition: all 0.15s;
-      position: relative;
-      overflow: hidden;
-    }
-    .proj::before {
-      content:'';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 2px;
-      transition: opacity 0.2s;
-      opacity: 0;
-    }
-    .proj.live::before { background: var(--green); opacity: 1; }
-    .proj.active::before { background: var(--blue); opacity: 1; }
-    .proj:hover { border-color: var(--border-bright); }
-    .proj-icon { font-size: 15px; flex-shrink: 0; }
-    .proj-name { font-size: 12px; font-weight: 600; color: var(--text); flex: 1; }
-    .proj-badge {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      padding: 2px 7px;
-      border-radius: 8px;
-    }
-    .b-live { background: rgba(46,204,113,0.12); color: var(--green); }
-    .b-wip { background: rgba(52,152,219,0.12); color: var(--blue); }
-    .b-plan { background: rgba(255,255,255,0.05); color: var(--text3); }
-    .b-future { color: var(--text3); border: 1px solid var(--border); }
-
-    /* QUICK LINKS */
-    .links-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
-    @media(max-width:700px){ .links-grid{ grid-template-columns:1fr 1fr; } }
-
-    .lk {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .lk:hover { border-color: var(--border-bright); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-    .lk-icon { font-size: 18px; flex-shrink: 0; }
-    .lk-name { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .lk-url { font-size: 10px; color: var(--text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    /* ACTIVITY */
-    .act-list { display: flex; flex-direction: column; gap: 6px; }
-    .act {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 12px;
-      transition: border-color 0.2s;
-    }
-    .act:hover { border-color: var(--border-bright); }
-    .act-ic { font-size: 14px; }
-    .act-tx { flex: 1; color: var(--text); }
-    .act-tm { font-size: 10px; color: var(--text3); white-space: nowrap; }
-
-    /* CHATBOTS */
-    .bot-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
-    @media(max-width:600px){ .bot-grid{ grid-template-columns:1fr; } }
-
-    .bot-card {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px;
-      transition: all 0.2s;
-    }
-    .bot-card:hover { border-color: var(--border-bright); transform: translateY(-1px); }
-    .bot-icon { font-size: 28px; margin-bottom: 10px; display: block; }
-    .bot-name {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-    }
-    .bot-desc { font-size: 11px; color: var(--text3); line-height: 1.6; }
-    .bot-tag {
-      display: inline-block;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: 8px;
-      background: rgba(52,152,219,0.1);
-      color: var(--blue);
-      margin-top: 10px;
-    }
-
-    footer { text-align: center; padding: 24px; font-size: 10px; color: var(--text3); letter-spacing: 2px; }
-  </style>
+/* Builds grid */
+.builds-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+.build-item { border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:12px; text-align:center; transition:all 0.2s; }
+.build-item:hover { border-color:rgba(49,155,66,0.2); }
+.build-item.live { border-color:rgba(49,155,66,0.15); background:rgba(49,155,66,0.03); }
+.build-icon { font-size:20px; margin-bottom:6px; }
+.build-name { font-size:10px; font-weight:600; color:rgba(255,255,255,0.6); }
+.build-item.live .build-name { color:rgba(255,255,255,0.8); }
+.b-live { font-size:8px; font-weight:700; color:#319B42; margin-top:4px; }
+.b-plan { font-size:8px; color:#333; margin-top:4px; }
+</style>
 </head>
 <body>
-
-<canvas id="neural-canvas"></canvas>
-<canvas id="mouse-canvas"></canvas>
-
-<div class="page">
-
-  <header>
-    <div class="header-top">
-      <div class="h-pill"><div class="h-pill-dot"></div>All Systems Online</div>
-      <div class="h-pill">9 Agents Active</div>
-      <div class="h-pill">23 Projects</div>
+<div id="gate" style="position:fixed;inset:0;z-index:1000;background:#060912;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:Inter,sans-serif">
+  <div style="font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#333">The Mothership</div>
+  <input id="pw" type="password" placeholder="••••••••••••" autocomplete="off" style="background:#0a0f1a;border:1px solid #1a2a3a;border-radius:10px;padding:12px 18px;color:#fff;font-size:14px;font-family:Inter,sans-serif;outline:none;width:240px;text-align:center;letter-spacing:2px">
+  <button onclick="unlock()" style="padding:10px 28px;background:#319B42;color:#000;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">Enter</button>
+  <div id="gate-err" style="font-size:11px;color:#e74c3c;height:16px"></div>
+</div>
+<div id="warroom" style="display:none">
+<div class="top-stripe"></div>
+<nav class="nav">
+  <div class="nav-left">
+    <div class="nav-logo-text">WAISMAN <em>MOTHERSHIP</em></div>
+    <div class="nav-center">
+      <div class="nav-tab active">Overview</div>
+      <div class="nav-tab">Agents</div>
+      <div class="nav-tab">Builds</div>
+      <div class="nav-tab">Finance</div>
     </div>
-    <h1>THE<br><span class="sub-word">MOTHER</span>SHIP</h1>
-    <p class="tagline">Waisman Organization · <em>Powered by Zero ⚡</em></p>
+  </div>
+  <div class="nav-right">POWERED BY ZERO ⚡ · MAR 27 2026</div>
+</nav>
 
-    <div class="counter-strip">
-      <div class="counter-item">
-        <div class="counter-num green" id="c-agents">9</div>
-        <div class="counter-label">Agents</div>
+<div class="main">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Org Performance</div>
+      <div class="meter-block">
+        <div class="meter-top"><div class="meter-name">Total MTD ALP</div><div class="meter-val" id="total-alp">$216K</div></div>
+        <div class="meter-bar"><div class="meter-fill fill-g" style="width:58%"></div></div>
       </div>
-      <div class="counter-item">
-        <div class="counter-num" id="c-projects">23</div>
-        <div class="counter-label">Projects</div>
-      </div>
-      <div class="counter-item">
-        <div class="counter-num" id="c-crons">12</div>
-        <div class="counter-label">Cron Jobs</div>
-      </div>
-      <div class="counter-item">
-        <div class="counter-num" id="c-agencies">3</div>
-        <div class="counter-label">Agencies</div>
-      </div>
-      <div class="counter-item">
-        <div class="counter-num green" id="c-live">4</div>
-        <div class="counter-label">Live Apps</div>
+      <div class="meter-block">
+        <div class="meter-top"><div class="meter-name">Total Leads</div><div class="meter-val">12,380</div></div>
+        <div class="meter-bar"><div class="meter-fill fill-b" style="width:72%"></div></div>
       </div>
     </div>
-  </header>
-
-  <div class="grid">
-
-    <!-- AGENTS -->
-    <div class="panel full">
-      <div class="panel-label">Agent Fleet</div>
-      <div class="agent-grid">
-        <div class="agent-card is-active" id="agent-main">
-          <div class="agent-orb">⚡</div>
-          <div class="agent-name">ZERO</div>
-          <div class="agent-role">Main · Strategy & Build</div>
-          <span class="agent-status s-active"><span class="s-dot"></span>Active</span>
-          <div class="agent-last" id="last-main">Always on</div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Agencies</div>
+      <div class="org-pills">
+        <div class="org-pill wo">
+          <div><div class="org-pill-name">🔵 WO</div><div class="org-pill-sub">40 agents · 2,095 leads</div></div>
+          <div><div class="org-pill-stat">$59K</div></div>
         </div>
-        <div class="agent-card" id="agent-discordbot">
-          <div class="agent-orb">🤖</div>
-          <div class="agent-name">DISCORDBOT</div>
-          <div class="agent-role">Power Hour · Daily News</div>
-          <span class="agent-status s-idle" id="status-discordbot"><span class="s-dot"></span>Idle</span>
-          <div class="agent-last" id="last-discordbot">—</div>
+        <div class="org-pill wg">
+          <div><div class="org-pill-name">🟣 WG</div><div class="org-pill-sub">53 agents · 4,505 leads</div></div>
+          <div><div class="org-pill-stat">$89K</div></div>
         </div>
-        <div class="agent-card" id="agent-salesbot">
-          <div class="agent-orb">🎯</div>
-          <div class="agent-name">SALESBOT</div>
-          <div class="agent-role">GHL · Leads · Dialer</div>
-          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
-        </div>
-        <div class="agent-card" id="agent-recruitbot">
-          <div class="agent-orb">🧲</div>
-          <div class="agent-name">RECRUITBOT</div>
-          <div class="agent-role">ATS · Pipeline · Outreach</div>
-          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
-        </div>
-        <div class="agent-card" id="agent-contentbot">
-          <div class="agent-orb">📊</div>
-          <div class="agent-name">CONTENTBOT</div>
-          <div class="agent-role">Social · Decks · Email</div>
-          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
-        </div>
-        <div class="agent-card" id="agent-researchbot">
-          <div class="agent-orb">🔍</div>
-          <div class="agent-name">RESEARCHBOT</div>
-          <div class="agent-role">Trends · Market Intel</div>
-          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
-        </div>
-        <div class="agent-card">
-          <div class="agent-orb">📜</div>
-          <div class="agent-name">LICENSINGBOT</div>
-          <div class="agent-role">Licensing · State Exams</div>
-          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
-        </div>
-        <div class="agent-card">
-          <div class="agent-orb">🎓</div>
-          <div class="agent-name">TRAININGBOT</div>
-          <div class="agent-role">Scripts · Objections · Close</div>
-          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
-        </div>
-        <div class="agent-card">
-          <div class="agent-orb">👑</div>
-          <div class="agent-name">LEADERSHIPBOT</div>
-          <div class="agent-role">Coaching · Managers</div>
-          <span class="agent-status s-idle"><span class="s-dot"></span>Idle</span>
+        <div class="org-pill wp">
+          <div><div class="org-pill-name">🟢 WP</div><div class="org-pill-sub">41 agents · 5,780 leads</div></div>
+          <div><div class="org-pill-stat">$25K</div></div>
         </div>
       </div>
     </div>
-
-    <!-- POWER HOUR -->
-    <div class="panel">
-      <div class="panel-label">Power Hour</div>
-      <div class="ph-split">
-        <div>
-          <div class="ph-lbl" id="ph-lbl">Next Power Hour</div>
-          <div class="ph-num" id="ph-num">--:--:--</div>
-          <div class="ph-sub" id="ph-sub">EST · Mon–Fri</div>
-          <div class="ph-bar"><div class="ph-fill" id="ph-fill" style="width:0%"></div></div>
-        </div>
-        <div class="scoring">
-          <div class="sc-row"><span class="sc-k">C</span><span class="sc-l">Calls</span><span class="sc-p">1pt</span></div>
-          <div class="sc-row"><span class="sc-k">P</span><span class="sc-l">Presentations</span><span class="sc-p">30pt</span></div>
-          <div class="sc-row"><span class="sc-k">S</span><span class="sc-l">Sales</span><span class="sc-p">60pt</span></div>
-          <div class="sc-row"><span class="sc-k">🥇</span><span class="sc-l">Winner</span><span class="sc-p green">40 Leads</span></div>
-          <div class="sc-row"><span class="sc-k">🎟</span><span class="sc-l">Raffle</span><span class="sc-p green">40 Leads</span></div>
-        </div>
-      </div>
+    <div class="sidebar-section" style="border:none;margin:0">
+      <div class="sidebar-label">System Status</div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Waisman HQ</div><div class="sys-status on">LIVE</div></div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Brackets Site</div><div class="sys-status on">LIVE</div></div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Client Form</div><div class="sys-status on">LIVE</div></div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Zero Agent</div><div class="sys-status on">ONLINE</div></div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Supabase (WO)</div><div class="sys-status on">LIVE</div></div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Supabase (CSS)</div><div class="sys-status on">LIVE</div></div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Hetzner Server</div><div class="sys-status on">LIVE</div></div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Email Parser</div><div class="sys-status on">LIVE</div></div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">OpenAI Image Gen</div><div class="sys-status on">LIVE</div></div>
+      <div class="sys-row"><div class="sys-dot on"></div><div class="sys-name">Google OAuth</div><div class="sys-status on">LIVE</div></div>
+      <div class="sys-row"><div class="sys-dot dim"></div><div class="sys-name">Crypto Bots</div><div class="sys-status dim">WEEKEND</div></div>
+      <div class="sys-row"><div class="sys-dot dim"></div><div class="sys-name">Tailscale VPN</div><div class="sys-status dim">SETUP</div></div>
+      <div class="sys-row"><div class="sys-dot dim"></div><div class="sys-name">GHL Integration</div><div class="sys-status dim">PLANNED</div></div>
     </div>
+  </div>
 
-    <!-- CHATBOTS -->
-    <div class="panel wide">
-      <div class="panel-label">AI Chatbots</div>
-      <div class="bot-grid">
-        <div class="bot-card">
-          <span class="bot-icon">📜</span>
-          <div class="bot-name">LICENSING BOT</div>
-          <div class="bot-desc">State licensing steps, exam prep, Prometric/PSI scheduling, background checks, CE requirements.</div>
-          <span class="bot-tag">Ask Anything</span>
-        </div>
-        <div class="bot-card">
-          <span class="bot-icon">🎓</span>
-          <div class="bot-name">TRAINING BOT</div>
-          <div class="bot-desc">Sales scripts, objection handling, appointment setting, closing techniques, product knowledge.</div>
-          <span class="bot-tag">Ask Anything</span>
-        </div>
-        <div class="bot-card">
-          <span class="bot-icon">👑</span>
-          <div class="bot-name">LEADERSHIP BOT</div>
-          <div class="bot-desc">Team coaching, recruiting, running meetings, building culture, MGA/RGA bonus strategy.</div>
-          <span class="bot-tag">Ask Anything</span>
-        </div>
-      </div>
+  <!-- Content -->
+  <div class="content-area">
+
+    <!-- ORG BUILDS -->
+    <div class="filmstrip-header" style="margin-bottom:12px">
+      <div class="filmstrip-title">ORG BUILDS</div>
+      <div class="filmstrip-badge">18 LIVE · 6 PLANNED</div>
     </div>
-
-    <!-- WAISMAN PROJECTS -->
-    <div class="panel">
-      <div class="panel-label">Waisman Org Builds</div>
-      <div class="proj-list">
-        <div class="proj live"><span class="proj-icon">✅</span><span class="proj-name">Power Hour Bot</span><span class="proj-badge b-live">Live</span></div>
-        <div class="proj live"><span class="proj-icon">📞</span><span class="proj-name">Predictive Dialer</span><span class="proj-badge b-live">Live</span></div>
-        <div class="proj live"><span class="proj-icon">📋</span><span class="proj-name">Policy Form</span><span class="proj-badge b-live">Live</span></div>
-        <div class="proj live"><span class="proj-icon">📄</span><span class="proj-name">Client Comms System</span><span class="proj-badge b-live">Live</span></div>
-        <div class="proj"><span class="proj-icon">🔗</span><span class="proj-name">GoHighLevel Integration</span><span class="proj-badge b-plan">Planned</span></div>
-        <div class="proj"><span class="proj-icon">🧲</span><span class="proj-name">Recruiting Automation</span><span class="proj-badge b-plan">Planned</span></div>
-        <div class="proj"><span class="proj-icon">💰</span><span class="proj-name">MGA/RGA Bonus Tracker</span><span class="proj-badge b-plan">Planned</span></div>
-        <div class="proj"><span class="proj-icon">📞</span><span class="proj-name">Lead Nurturing + Dialer</span><span class="proj-badge b-plan">Planned</span></div>
-        <div class="proj"><span class="proj-icon">📅</span><span class="proj-name">Content Calendar</span><span class="proj-badge b-plan">Planned</span></div>
-        <div class="proj"><span class="proj-icon">📡</span><span class="proj-name">Twilio Integration</span><span class="proj-badge b-future">Future</span></div>
-      </div>
-    </div>
-
-    <!-- HQ PROJECTS -->
-    <div class="panel">
-      <div class="panel-label">HQ Platform Builds</div>
-      <div class="proj-list">
-        <div class="proj active"><span class="proj-icon">🎯</span><span class="proj-name">ATS Recruiting System</span><span class="proj-badge b-wip">In Progress</span></div>
-        <div class="proj active"><span class="proj-icon">📊</span><span class="proj-name">Pipeline Bot & Dashboard</span><span class="proj-badge b-wip">In Progress</span></div>
-        <div class="proj"><span class="proj-icon">💹</span><span class="proj-name">Sales & Data</span><span class="proj-badge b-plan">Planned</span></div>
-        <div class="proj"><span class="proj-icon">👑</span><span class="proj-name">Leadership Development</span><span class="proj-badge b-plan">Planned</span></div>
-        <div class="proj"><span class="proj-icon">🔁</span><span class="proj-name">Conservation Bots</span><span class="proj-badge b-plan">Planned</span></div>
-        <div class="proj"><span class="proj-icon">🔍</span><span class="proj-name">Conservation & Quality</span><span class="proj-badge b-plan">Planned</span></div>
-        <div class="proj"><span class="proj-icon">📱</span><span class="proj-name">Social Media Ads</span><span class="proj-badge b-plan">Planned</span></div>
-        <div class="proj"><span class="proj-icon">📊</span><span class="proj-name">Monday Meeting Deck</span><span class="proj-badge b-plan">Planned</span></div>
-        <div class="proj"><span class="proj-icon">🎬</span><span class="proj-name">AI Promo Videos</span><span class="proj-badge b-plan">Planned</span></div>
-        <div class="proj"><span class="proj-icon">📧</span><span class="proj-name">Email Optimization</span><span class="proj-badge b-plan">Planned</span></div>
-      </div>
+    <div class="builds-grid" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr));margin-bottom:28px">
+      <div class="build-item live"><div class="build-icon">🏢</div><div class="build-name">Waisman HQ</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">👥</div><div class="build-name">Roster + Hierarchy</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">📊</div><div class="build-name">PNP Parser</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">📈</div><div class="build-name">Prod by Levels</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">🏆</div><div class="build-name">VIP Tracker</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">✅</div><div class="build-name">Quality Dashboard</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">🎯</div><div class="build-name">Promotion Clock</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">📋</div><div class="build-name">Lead Requests</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">📧</div><div class="build-name">Email Parser</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">🗃️</div><div class="build-name">Ret Extract</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">💰</div><div class="build-name">Financial Analysis</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">📡</div><div class="build-name">Lead Performance</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">💼</div><div class="build-name">Commissions Calc</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">🏀</div><div class="build-name">Brackets App</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">📝</div><div class="build-name">Client Form</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">🗄️</div><div class="build-name">Supabase (x2)</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">🖥️</div><div class="build-name">Hetzner Server</div><div class="b-live">LIVE</div></div>
+      <div class="build-item live"><div class="build-icon">🎨</div><div class="build-name">OpenAI Image Gen</div><div class="b-live">LIVE</div></div>
+      <div class="build-item"><div class="build-icon">🤖</div><div class="build-name">Crypto Bots (3)</div><div class="b-plan">WEEKEND</div></div>
+      <div class="build-item"><div class="build-icon">📊</div><div class="build-name">MEV Bot</div><div class="b-plan">WEEKEND</div></div>
+      <div class="build-item"><div class="build-icon">👛</div><div class="build-name">Wallet Copy Bot</div><div class="b-plan">WEEKEND</div></div>
+      <div class="build-item"><div class="build-icon">💬</div><div class="build-name">Manager Chatbot</div><div class="b-plan">PLANNED</div></div>
+      <div class="build-item"><div class="build-icon">🔗</div><div class="build-name">GHL Integration</div><div class="b-plan">PLANNED</div></div>
+      <div class="build-item"><div class="build-icon">🧲</div><div class="build-name">Recruiting Auto</div><div class="b-plan">PLANNED</div></div>
     </div>
 
     <!-- QUICK LINKS -->
-    <div class="panel full">
-      <div class="panel-label">Quick Links</div>
-      <div class="links-grid">
-        <a class="lk" href="https://waisman-platform.vercel.app" target="_blank"><span class="lk-icon">🚀</span><div><div class="lk-name">Waisman Platform</div><div class="lk-url">waisman-platform.vercel.app</div></div></a>
-        <a class="lk" href="https://waisman-dialer.vercel.app" target="_blank"><span class="lk-icon">📞</span><div><div class="lk-name">Predictive Dialer</div><div class="lk-url">waisman-dialer.vercel.app</div></div></a>
-        <a class="lk" href="https://waisman-policy-form.vercel.app" target="_blank"><span class="lk-icon">📋</span><div><div class="lk-name">Policy Form</div><div class="lk-url">waisman-policy-form.vercel.app</div></div></a>
-        <a class="lk" href="https://waisman-policy-form.vercel.app/system-overview.html" target="_blank"><span class="lk-icon">📄</span><div><div class="lk-name">Client Comms Doc</div><div class="lk-url">system-overview.html</div></div></a>
-        <a class="lk" href="https://drive.google.com/drive/folders/1DIoif1il_duDfY2mqmcShRGJKUd9LIbA" target="_blank"><span class="lk-icon">📁</span><div><div class="lk-name">HQ Google Drive</div><div class="lk-url">drive.google.com</div></div></a>
-        <a class="lk" href="https://drive.google.com/drive/folders/1QBjwtZPtDL2PWf3ej4vGkfsphA2hQU9O" target="_blank"><span class="lk-icon">📁</span><div><div class="lk-name">CSS Google Drive</div><div class="lk-url">drive.google.com</div></div></a>
-        <a class="lk" href="https://brackets.waismanorganization.com" target="_blank"><span class="lk-icon">🏆</span><div><div class="lk-name">March Madness Brackets</div><div class="lk-url">brackets.waismanorganization.com</div></div></a>
-        <a class="lk" href="https://vjcfbccsybkriefnyvhf.supabase.co" target="_blank"><span class="lk-icon">🗄️</span><div><div class="lk-name">Supabase Database</div><div class="lk-url">supabase.co</div></div></a>
-      </div>
+    <div class="filmstrip-header" style="margin-bottom:12px">
+      <div class="filmstrip-title">QUICK LINKS</div>
+    </div>
+    <div class="links-strip" style="margin-bottom:28px">
+      <a class="link-chip" href="https://waisman-leads.vercel.app" target="_blank"><div class="ld on"></div>Waisman HQ</a>
+      <a class="link-chip" href="https://brackets.waismanorganization.com" target="_blank"><div class="ld on"></div>Brackets App</a>
+      <a class="link-chip" href="https://waisman-policy-form.vercel.app" target="_blank"><div class="ld on"></div>Client Form</a>
+      <a class="link-chip" href="https://waisman-policy-form.vercel.app/system-overview.html" target="_blank"><div class="ld on"></div>Client Comms Doc</a>
+      <a class="link-chip" href="https://degenville-five.vercel.app" target="_blank"><div class="ld on"></div>Degenville (Vercel)</a>
+      <a class="link-chip" href="https://github.com/zeroai0" target="_blank"><div class="ld on"></div>GitHub (zeroai0)</a>
+      <a class="link-chip" href="https://vercel.com/zeros-projects-1b033c70" target="_blank"><div class="ld on"></div>Vercel Dashboard</a>
+      <a class="link-chip" href="https://supabase.com/dashboard/project/vjcfbccsybkriefnyvhf" target="_blank"><div class="ld on"></div>Supabase (WO)</a>
+      <a class="link-chip" href="https://supabase.com/dashboard/project/ojfxkdgqyuntgfxuxoyj" target="_blank"><div class="ld on"></div>Supabase (CSS)</a>
+      <a class="link-chip" href="https://console.hetzner.cloud" target="_blank"><div class="ld on"></div>Hetzner Console</a>
     </div>
 
-    <!-- ACTIVITY -->
-    <div class="panel full">
-      <div class="panel-label">Live Activity</div>
-      <div class="act-list" id="activity-feed">
-        <div class="act"><span class="act-ic">🤖</span><span class="act-tx">9-agent fleet fully deployed — LicensingBot, TrainingBot, LeadershipBot added</span><span class="act-tm">Mar 27</span></div>
-        <div class="act"><span class="act-ic">🚀</span><span class="act-tx">Waisman Platform launched — unified hub, role-based access</span><span class="act-tm">Mar 27</span></div>
-        <div class="act"><span class="act-ic">📞</span><span class="act-tx">Predictive Dialer deployed — agent view, manager board, outcome logging</span><span class="act-tm">Mar 27</span></div>
-        <div class="act"><span class="act-ic">🗄️</span><span class="act-tx">Supabase connected — 3 tables live: policy_applications, scores, referrals</span><span class="act-tm">Mar 26</span></div>
-        <div class="act"><span class="act-ic">📋</span><span class="act-tx">Client Policy Form deployed — Globe Life branded, Supabase-connected</span><span class="act-tm">Mar 25</span></div>
-        <div class="act"><span class="act-ic">🏢</span><span class="act-tx">HQ Discord cleaned — categories, permissions, Google Drives pinned</span><span class="act-tm">Mar 25</span></div>
-        <div class="act"><span class="act-ic">🔥</span><span class="act-tx">Power Hour Bot live — 12 cron jobs, weekly prizes, scoring system</span><span class="act-tm">Mar 24</span></div>
-      </div>
+    <!-- AGENT FLEET -->
+    <div class="filmstrip-header" style="margin-bottom:12px">
+      <div class="filmstrip-title">AGENT FLEET</div>
+      <div class="filmstrip-badge">14 AGENTS · ZERO AI</div>
+    </div>
+    <div class="builds-grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-bottom:28px">
+      <div class="build-item live" style="text-align:left;padding:14px;border-color:rgba(49,155,66,0.3)"><div class="build-icon">⚡</div><div class="build-name">ZERO</div><div class="b-live">● ACTIVE</div><div style="font-size:10px;color:#555;margin-top:3px">Main · Strategy &amp; Build</div></div>
+      <div class="build-item live" style="text-align:left;padding:14px"><div class="build-icon">🔥</div><div class="build-name">POWERHOUR</div><div class="b-plan">● IDLE</div><div style="font-size:10px;color:#555;margin-top:3px">Sales Bot · 8–10 PM EST</div></div>
+      <div class="build-item live" style="text-align:left;padding:14px"><div class="build-icon">📰</div><div class="build-name">NEWSBOT</div><div class="b-plan">● IDLE</div><div style="font-size:10px;color:#555;margin-top:3px">Daily Briefing · 7 AM</div></div>
+      <div class="build-item live" style="text-align:left;padding:14px"><div class="build-icon">🎯</div><div class="build-name">ATS BOT</div><div class="b-plan">● STANDBY</div><div style="font-size:10px;color:#555;margin-top:3px">Recruiting Pipeline</div></div>
+      <div class="build-item live" style="text-align:left;padding:14px"><div class="build-icon">📜</div><div class="build-name">LICENSING BOT</div><div class="b-plan">● STANDBY</div><div style="font-size:10px;color:#555;margin-top:3px">HQ · Licensing Q&amp;A</div></div>
+      <div class="build-item live" style="text-align:left;padding:14px"><div class="build-icon">🎓</div><div class="build-name">TRAINING BOT</div><div class="b-plan">● STANDBY</div><div style="font-size:10px;color:#555;margin-top:3px">HQ · Agent Training</div></div>
+      <div class="build-item live" style="text-align:left;padding:14px"><div class="build-icon">👑</div><div class="build-name">LEADERSHIP BOT</div><div class="b-plan">● STANDBY</div><div style="font-size:10px;color:#555;margin-top:3px">HQ · Leadership Dev</div></div>
+      <div class="build-item live" style="text-align:left;padding:14px"><div class="build-icon">💹</div><div class="build-name">SALES BOT</div><div class="b-plan">● STANDBY</div><div style="font-size:10px;color:#555;margin-top:3px">HQ · Sales Coaching</div></div>
+      <div class="build-item live" style="text-align:left;padding:14px"><div class="build-icon">🧲</div><div class="build-name">RECRUIT BOT</div><div class="b-plan">● STANDBY</div><div style="font-size:10px;color:#555;margin-top:3px">HQ · Recruiting Support</div></div>
+      <div class="build-item live" style="text-align:left;padding:14px"><div class="build-icon">📣</div><div class="build-name">CONTENT BOT</div><div class="b-plan">● STANDBY</div><div style="font-size:10px;color:#555;margin-top:3px">HQ · Social &amp; Content</div></div>
+      <div class="build-item live" style="text-align:left;padding:14px"><div class="build-icon">🔬</div><div class="build-name">RESEARCH BOT</div><div class="b-plan">● STANDBY</div><div style="font-size:10px;color:#555;margin-top:3px">HQ · Market Research</div></div>
+      <div class="build-item live" style="text-align:left;padding:14px"><div class="build-icon">🎬</div><div class="build-name">VIDEO ENGINE</div><div class="b-plan">● ON DEMAND</div><div style="font-size:10px;color:#555;margin-top:3px">Hype Videos &amp; Reels</div></div>
+      <div class="build-item" style="text-align:left;padding:14px;border-style:dashed"><div class="build-icon">📱</div><div class="build-name">SOCIAL BOT</div><div class="b-plan">● PLANNED</div><div style="font-size:10px;color:#555;margin-top:3px">Instagram Auto-Post</div></div>
+      <div class="build-item" style="text-align:left;padding:14px;border-style:dashed"><div class="build-icon">🏛️</div><div class="build-name">MOTHERSHIP BOT</div><div class="b-plan">● PLANNED</div><div style="font-size:10px;color:#555;margin-top:3px">Stack Maintenance</div></div>
+    </div>
+
+    <!-- MAD MONEY -->
+    <div class="filmstrip-header" style="margin-bottom:16px">
+      <div class="filmstrip-title">MAD MONEY — TOP AGENTS</div>
+      <div class="filmstrip-badge">WEEK 2 APR 2026</div>
+    </div>
+    <div class="filmstrip">
+      <div style="font-size:11px;color:#555;padding:8px 0;">Live data — pulled from Waisman HQ · Week 2 April 8, 2026</div>
+      <div class="agent-card top1"><div class="ac-rank">🥇</div><div class="ac-name">WO Agency</div><div class="ac-org">Week Net ALP</div><div class="ac-val gold">$23,073</div></div>
+      <div class="agent-card top2"><div class="ac-rank">🥈</div><div class="ac-name">WP Agency</div><div class="ac-org">Week Net ALP</div><div class="ac-val">$19,995</div></div>
+      <div class="agent-card top3"><div class="ac-rank">🥉</div><div class="ac-name">WG Agency</div><div class="ac-org">Week Net ALP</div><div class="ac-val">$11,850</div></div>
     </div>
 
   </div>
 
-  <footer>The Mothership · Waisman Organization · Powered by Zero ⚡</footer>
 </div>
-
 <script>
-  // Password
-  (function(){
-    if(sessionStorage.getItem('ms_auth')!=='ok'){
-      const i=prompt('Access code:');
-      if(i!=='Waisman2026'){document.body.innerHTML='<div style="background:#080808;color:#222;height:100vh;display:flex;align-items:center;justify-content:center;font-family:monospace;letter-spacing:3px;font-size:12px">ACCESS DENIED</div>';return;}
-      sessionStorage.setItem('ms_auth','ok');
-    }
-  })();
+function unlock(){
+  if(document.getElementById("pw").value!=="Waisman2026"){
+    document.getElementById("gate-err").textContent="Incorrect password";
+    return;
+  }
+  document.getElementById("gate").style.display="none";
+  document.getElementById("warroom").style.display="block";
+}
+document.getElementById("pw").addEventListener("keydown",function(e){if(e.key==="Enter")unlock();});
 
-  // Neural network canvas
-  const nc = document.getElementById('neural-canvas');
-  const nctx = nc.getContext('2d');
-  let particles=[], W, H;
-  let mouse = {x:-1000, y:-1000};
+  // ── Live Data from Supabase ──────────────────────────────────────────────
+  const SUPA = 'https://vjcfbccsybkriefnyvhf.supabase.co';
+  const SUPA_KEY = 'sb_publishable_S7SAUXcsIf4gw2mbJdrn9Q_tuBmXvK6';
 
-  document.addEventListener('mousemove', e => { mouse.x=e.clientX; mouse.y=e.clientY; });
-
-  function resize(){W=nc.width=window.innerWidth;H=nc.height=window.innerHeight;}
-  resize(); window.addEventListener('resize',()=>{resize();init();});
-
-  function init(){
-    particles=[];
-    const n=Math.floor((W*H)/9000);
-    for(let i=0;i<n;i++){
-      particles.push({
-        x:Math.random()*W, y:Math.random()*H,
-        vx:(Math.random()-.5)*.35, vy:(Math.random()-.5)*.35,
-        r:Math.random()*1.5+.5,
-        base:{x:0,y:0}
+  async function fetchLiveData() {
+    try {
+      const resp = await fetch(`${SUPA}/rest/v1/agency_stats`, {
+        headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
       });
-      particles[particles.length-1].base={x:particles[particles.length-1].x,y:particles[particles.length-1].y};
-    }
-  }
-  init();
+      const rows = await resp.json();
+      if (!Array.isArray(rows) || !rows.length) return;
 
-  // Mouse canvas for interactive glow
-  const mc = document.getElementById('mouse-canvas');
-  const mctx = mc.getContext('2d');
-  mc.width=mc.height=1; // resize handled in draw
+      let totalAlp = 0;
+      rows.forEach(r => {
+        const org = r.org.toLowerCase();
+        const alpK = Math.round(r.actual_alp / 1000);
+        const vips = r.actual_vips || 0;
+        const codes = r.actual_codes || 0;
+        totalAlp += r.actual_alp || 0;
 
-  function drawNeural(){
-    nc.width=W; nc.height=H;
-    nctx.clearRect(0,0,W,H);
+        const alpEl = document.getElementById(`${org}-alp`);
+        const subEl = document.getElementById(`${org}-sub`);
+        if (alpEl) alpEl.textContent = `$${alpK}K`;
+        if (subEl) subEl.textContent = `${vips} VIPs · ${codes} Codes`;
+      });
 
-    for(let i=0;i<particles.length;i++){
-      const p=particles[i];
-      // mouse repel
-      const dx=p.x-mouse.x, dy=p.y-mouse.y;
-      const dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist<150){
-        const force=(150-dist)/150;
-        p.vx += (dx/dist)*force*0.3;
-        p.vy += (dy/dist)*force*0.3;
-      }
-      // velocity damping
-      p.vx*=0.98; p.vy*=0.98;
-      p.x+=p.vx; p.y+=p.vy;
-      if(p.x<0||p.x>W)p.vx*=-1;
-      if(p.y<0||p.y>H)p.vy*=-1;
+      const totalEl = document.getElementById('total-alp');
+      if (totalEl) totalEl.textContent = `$${Math.round(totalAlp/1000)}K`;
 
-      nctx.beginPath(); nctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      nctx.fillStyle='rgba(180,180,180,0.45)'; nctx.fill();
-
-      for(let j=i+1;j<particles.length;j++){
-        const q=particles[j];
-        const ddx=p.x-q.x,ddy=p.y-q.y,d=Math.sqrt(ddx*ddx+ddy*ddy);
-        if(d<110){
-          const alpha=0.12*(1-d/110);
-          // near mouse = brighter green lines
-          const mdx=(p.x+q.x)/2-mouse.x, mdy=(p.y+q.y)/2-mouse.y;
-          const md=Math.sqrt(mdx*mdx+mdy*mdy);
-          if(md<200){
-            nctx.strokeStyle=`rgba(46,204,113,${alpha*2.5*(1-md/200)})`;
-          } else {
-            nctx.strokeStyle=`rgba(180,180,180,${alpha})`;
-          }
-          nctx.lineWidth=.5;
-          nctx.beginPath(); nctx.moveTo(p.x,p.y); nctx.lineTo(q.x,q.y); nctx.stroke();
-        }
-      }
-    }
-
-    // Mouse glow radial
-    const grad=nctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,200);
-    grad.addColorStop(0,'rgba(46,204,113,0.06)');
-    grad.addColorStop(1,'rgba(46,204,113,0)');
-    nctx.fillStyle=grad;
-    nctx.fillRect(0,0,W,H);
-
-    requestAnimationFrame(drawNeural);
-  }
-  drawNeural();
-
-  // Animated counters
-  function animateCount(el, target, duration=1500){
-    let start=null;
-    const step=ts=>{
-      if(!start)start=ts;
-      const p=Math.min((ts-start)/duration,1);
-      el.textContent=Math.floor(p*target);
-      if(p<1)requestAnimationFrame(step);
-      else el.textContent=target;
-    };
-    requestAnimationFrame(step);
-  }
-  setTimeout(()=>{
-    animateCount(document.getElementById('c-agents'),9);
-    animateCount(document.getElementById('c-projects'),23);
-    animateCount(document.getElementById('c-crons'),12);
-    animateCount(document.getElementById('c-agencies'),3);
-    animateCount(document.getElementById('c-live'),4);
-  },400);
-
-  // Power Hour
-  function updatePH(){
-    const est=new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
-    const day=est.getDay(),h=est.getHours(),m=est.getMinutes(),s=est.getSeconds();
-    const isWD=day>=1&&day<=5,total=h*3600+m*60+s,live=isWD&&h>=20&&h<21;
-    const tEl=document.getElementById('ph-num'),lEl=document.getElementById('ph-lbl'),sEl=document.getElementById('ph-sub'),fEl=document.getElementById('ph-fill');
-    if(live){
-      const rem=76200-total;
-      tEl.textContent=`00:${String(Math.floor(rem/60)).padStart(2,'0')}:${String(rem%60).padStart(2,'0')}`;
-      tEl.className='ph-num live';lEl.textContent='🔥 LIVE';sEl.textContent='Report: C X P Y S Z';
-      fEl.style.width=((total-72000)/3600*100)+'%';
-    } else {
-      let tgt=new Date(est);tgt.setHours(20,0,0,0);
-      if(total>=76200||!isWD){tgt.setDate(tgt.getDate()+1);while(tgt.getDay()===0||tgt.getDay()===6)tgt.setDate(tgt.getDate()+1);}
-      const diff=Math.floor((tgt-est)/1000);
-      const hh=String(Math.floor(diff/3600)).padStart(2,'0'),mm=String(Math.floor((diff%3600)/60)).padStart(2,'0'),ss=String(diff%60).padStart(2,'0');
-      tEl.textContent=`${hh}:${mm}:${ss}`;tEl.className='ph-num';
-      lEl.textContent='Next Power Hour';sEl.textContent='EST · Mon–Fri';fEl.style.width='0%';
-    }
-  }
-  updatePH();setInterval(updatePH,1000);
-
-  // Live data
-  const JOBS={'899f1a5a-6408-4108-96e2-872703663485':'Power Hour Kickoff','62b495df-34ef-4e6f-9181-e16a63388897':'Morning Briefing','74ad6d2f-2cef-473f-a3f5-e8ccc265841c':'Final Board'};
-  function ago(s){if(s<60)return`${s}s`;if(s<3600)return`${Math.floor(s/60)}m`;return`${Math.floor(s/3600)}h`;}
-
-  async function fetchAgents(){
-    try{
-      const r=await fetch('http://127.0.0.1:7474/api/agents');if(!r.ok)return;
-      const agents=await r.json();
-      for(const [id,data] of Object.entries(agents)){
-        const card=document.getElementById(`agent-${id}`);
-        const st=document.getElementById(`status-${id}`);
-        if(!card)continue;
-        if(data.status==='active'){card.classList.add('is-active');if(st){st.className='agent-status s-active';st.innerHTML='<span class="s-dot"></span>Active';}}
-        else{card.classList.remove('is-active');if(st){st.className='agent-status s-idle';st.innerHTML='<span class="s-dot"></span>Idle';}}
-      }
-    }catch{}
+    } catch(e) { console.warn('Live data fetch failed:', e); }
   }
 
-  async function fetchActivity(){
-    try{
-      const r=await fetch('http://127.0.0.1:7474/api/runs');if(!r.ok)return;
-      const runs=await r.json();if(!runs.length)return;
-      const feed=document.getElementById('activity-feed');
-      feed.innerHTML=runs.slice(0,7).map(r=>{
-        const n=JOBS[r.jobId]||'Agent task';
-        return`<div class="act"><span class="act-ic">${r.status==='ok'?'✅':'❌'}</span><span class="act-tx">🤖 <strong>${n}</strong> — ${r.status==='ok'?'completed':'failed'}</span><span class="act-tm">${ago(Math.floor((Date.now()-r.ts)/1000))} ago</span></div>`;
-      }).join('');
-    }catch{}
-  }
+  // Fetch on load and every 5 minutes
+  fetchLiveData();
+  setInterval(fetchLiveData, 5 * 60 * 1000);
 
-  fetchAgents();setInterval(fetchAgents,10000);
-  fetchActivity();setInterval(fetchActivity,15000);
 </script>
 </body>
 </html>
